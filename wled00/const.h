@@ -118,8 +118,9 @@
 #define USERMOD_ID_ADS1115               35     //Usermod "usermod_ads1115.h"
 #define USERMOD_ID_BOBLIGHT              36     //Usermod "boblight.h"
 #define USERMOD_ID_SD_CARD               37     //Usermod "usermod_sd_card.h"
-#define USERMOD_ID_PWM_OUTPUTS           38     //Usermod "usermod_pwm_outputs.h
-#define USERMOD_ID_SHT                   39     //Usermod "usermod_sht.h
+#define USERMOD_ID_PWM_OUTPUTS           38     //Usermod "usermod_pwm_outputs.h"
+#define USERMOD_ID_SHT                   39     //Usermod "usermod_sht.h"
+#define USERMOD_ID_SANDTABLE             40     //Usermod "sandtable.h"
 
 //Access point behavior
 #define AP_BEHAVIOR_BOOT_NO_CONN          0     //Open AP when no connection after boot
