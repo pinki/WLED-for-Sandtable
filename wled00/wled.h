@@ -729,7 +729,7 @@ WLED_GLOBAL volatile uint8_t jsonBufferLock _INIT(0);
   #define DEBUGOUT NetDebug
   WLED_GLOBAL bool netDebugEnabled _INIT(true);
   WLED_GLOBAL char netDebugPrintHost[33] _INIT(WLED_DEBUG_HOST);
-  #if defined(WLED_DEBUG_NET_PORT)
+  #if defined(WLED_DEBUG_PORT)
   WLED_GLOBAL int netDebugPrintPort _INIT(WLED_DEBUG_PORT);
   #else
   WLED_GLOBAL int netDebugPrintPort _INIT(7868);

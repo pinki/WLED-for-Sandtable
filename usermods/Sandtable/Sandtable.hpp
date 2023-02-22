@@ -3,7 +3,7 @@
 #include "wled.h"
 
 #include "pins.h"
-#include "magic_strings.h"
+#include "states/states.h"
 
 /*
  * Usermods allow you to add own functionality to WLED more easily
@@ -24,12 +24,15 @@
  */
 
 class Sandtable : public Usermod {
-  // RX: 16
-  // TX: 17
-
   private:
-    uint8_t rxPin = NO_PIN;
-    uint8_t txPin = NO_PIN;
+    static const char _configRootKey[];
+    static const char _configRxPinKey[];
+    static const char _configTxPinKey[];
+    
+    State& _currentState = initialState;
+
+    int8_t _rxPin = PIN_NOT_SET;
+    int8_t _txPin = PIN_NOT_SET;
 
     unsigned long lastTime = 0;
 
@@ -50,7 +53,7 @@ class Sandtable : public Usermod {
      * Use it to initialize network interfaces
      */
     void connected() {
-      //Serial.println("Connected to WiFi!");
+      DEBUG_PRINTLN("Sandtable is online 🥳");
     }
 
 
@@ -69,6 +72,11 @@ class Sandtable : public Usermod {
         //Serial.println("I'm alive!");
         lastTime = millis();
       }
+
+      // TODO: Read line from Serial2
+      const char* line = "my line";
+
+      _currentState = _currentState.ProcessLine(line, sizeof(line));
     }
 
 
@@ -106,7 +114,7 @@ class Sandtable : public Usermod {
      * Values in the state object may be modified by connected clients
      */
     void readFromJsonState(JsonObject& root) {
-      userVar0 = root["user0"] | userVar0; //if "user0" key exists in JSON, update, else keep old value
+      // userVar0 = root["user0"] | userVar0; //if "user0" key exists in JSON, update, else keep old value
       //if (root["bri"] == 255) Serial.println(F("Don't burn down your garage!"));
     }
 
@@ -147,13 +155,13 @@ class Sandtable : public Usermod {
      * I highly recommend checking out the basics of ArduinoJson serialization and deserialization in order to use custom settings!
      */
     void addToConfig(JsonObject& root) {
-      JsonObject top = root.createNestedObject(FLUIDNC_PLAYLIST_JSON_ROOT);
-      top[RX_PIN_JSON_NODE_NAME] = rxPin;
-      top[TX_PIN_JSON_NODE_NAME] = txPin;
-      
-      // JsonArray pinArray = top.createNestedArray("pin");
-      // pinArray.add(testPins[0]);
-      // pinArray.add(testPins[1]); 
+      JsonObject top = root.createNestedObject(FPSTR(_configRootKey));
+      top[FPSTR(_configRxPinKey)] = _rxPin;
+      top[FPSTR(_configTxPinKey)] = _txPin;
+
+      // JsonArray pinArray = top.createNestedArray(FPSTR(_pinsSection));
+      // pinArray.add(_rxPin);
+      // pinArray.add(_txPin); 
     }
 
 
@@ -175,25 +183,25 @@ class Sandtable : public Usermod {
     bool readFromConfig(JsonObject& root) {
       // default settings values could be set here (or below using the 3-argument getJsonValue()) instead of in the class definition or constructor
       // setting them inside readFromConfig() is slightly more robust, handling the rare but plausible use case of single value being missing after boot (e.g. if the cfg.json was manually edited and a value was removed)
-      uint8_t previousRxPin = rxPin;
-      uint8_t previousTxPin = txPin;
+      uint8_t previousRxPin = _rxPin;
+      uint8_t previousTxPin = _txPin;
 
-      JsonObject top = root[FLUIDNC_PLAYLIST_JSON_ROOT];
+      JsonObject top = root[FPSTR(_configRootKey)];
 
       bool configComplete = !top.isNull();
 
-      configComplete &= getJsonValue(top[RX_PIN_JSON_NODE_NAME], rxPin, UART2_RX_PIN);
-      configComplete &= getJsonValue(top[TX_PIN_JSON_NODE_NAME], txPin, UART2_TX_PIN);
+      configComplete &= getJsonValue(top[FPSTR(_configRxPinKey)], _rxPin, UART2_RX_PIN);
+      configComplete &= getJsonValue(top[FPSTR(_configTxPinKey)], _txPin, UART2_TX_PIN);
 
-      // configComplete &= getJsonValue(top["pin"][0], testPins[0], -1);
-      // configComplete &= getJsonValue(top["pin"][1], testPins[1], -1);
+      // configComplete &= getJsonValue(top[FPSTR(_pinsSection)][0], _rxPin, UART2_RX_PIN);
+      // configComplete &= getJsonValue(top[FPSTR(_pinsSection)][1], _txPin, UART2_TX_PIN);
 
-      if (rxPin != previousRxPin || txPin != previousTxPin) {
-        if (rxPin == NO_PIN || txPin == NO_PIN) {
+      if (_rxPin != previousRxPin || _txPin != previousTxPin) {
+        if (_rxPin == NO_PIN || _txPin == NO_PIN) {
           Serial2.end();
 
         } else {
-          Serial2.begin(115200, SERIAL_8N1, rxPin, txPin);
+          Serial2.begin(115200, SERIAL_8N1, _rxPin, _txPin);
         }
       }
 
@@ -219,3 +227,7 @@ class Sandtable : public Usermod {
       return USERMOD_ID_SANDTABLE;
     }
 };
+
+const char Sandtable::_configRootKey[]        PROGMEM = "Sandtable";
+const char Sandtable::_configRxPinKey[]       PROGMEM = "Rx-pin";
+const char Sandtable::_configTxPinKey[]       PROGMEM = "Tx-pin";

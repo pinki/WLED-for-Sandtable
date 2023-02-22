@@ -16,6 +16,7 @@ After that it makes FluidNC run one file after another automatically.
 | `$System/Sleep`       | Lets the system sleep |
 | `$Limits/Show`        | Enters a mode where the state of the limit switch inputs are shown. This can be used to test the connections. Send ! to exit this mode. |
 | `$Bye`                | Reboots the processor |
+| `$Motor/Disable`      | Disable all motors    |
 | `$System/Control`     | *This command needs further investigation* |
 | `$System/Stats`       | *This command needs further investigation* |
 | `$Notification/Send`  | *This command needs further investigation* |

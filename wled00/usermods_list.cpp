@@ -184,6 +184,10 @@
 #include "../usermods/sht/usermod_sht.h"
 #endif
 
+#ifdef USERMOD_SANDTABLE
+#include "../usermods/Sandtable/Sandtable.hpp"
+#endif
+
 
 void registerUsermods()
 {
@@ -347,5 +351,9 @@ void registerUsermods()
 
   #ifdef USERMOD_SHT
   usermods.add(new ShtUsermod());
+  #endif
+
+  #ifdef USERMOD_SANDTABLE
+  usermods.add(new Sandtable());
   #endif
 }
