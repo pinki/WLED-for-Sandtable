@@ -30,8 +30,5 @@ After that it makes FluidNC run one file after another automatically.
 
 
 ## Installation (from EXAMPLE_v2)
-
-Copy `usermod_v2_example.h` to the wled00 directory.  
-Uncomment the corresponding lines in `usermods_list.cpp` and compile!  
-_(You shouldn't need to actually install this, it does nothing useful)_
-
+Add `-D USERMOD_SANDTABLE` to your PlatformIO environment `build_flags`.
+If you are not using PlatformIO (which you should) try adding `#define USERMOD_SANDTABLE` to *my_config.h*.
