@@ -29,6 +29,6 @@ After that it makes FluidNC run one file after another automatically.
 | [`$Jog`](https://github.com/gnea/grbl/wiki/Grbl-v1.1-Jogging) | Could be interested for pong controller style drawing mode |
 
 
-## Installation (from EXAMPLE_v2)
+## Installation
 Add `-D USERMOD_SANDTABLE` to your PlatformIO environment `build_flags`.
 If you are not using PlatformIO (which you should) try adding `#define USERMOD_SANDTABLE` to *my_config.h*.
