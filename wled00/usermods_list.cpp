@@ -185,7 +185,7 @@
 #endif
 
 #ifdef USERMOD_SANDTABLE
-#include "../usermods/Sandtable/Sandtable.hpp"
+#include "src/Sandtable/Sandtable.hpp"
 #endif
 
 

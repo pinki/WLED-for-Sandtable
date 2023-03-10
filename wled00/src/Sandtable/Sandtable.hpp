@@ -3,7 +3,9 @@
 #include "wled.h"
 
 #include "pins.h"
-#include "states/states.h"
+#include "states/InitialState.hpp"
+
+#define SANDTABLE_LINE_BUFFER_SIZE  64
 
 /*
  * Usermods allow you to add own functionality to WLED more easily
@@ -37,24 +39,14 @@ class Sandtable : public Usermod {
     unsigned long lastTime = 0;
 
   public:
-    //Functions called by WLED
-
-    /*
-     * setup() is called once at boot. WiFi is not yet connected at this point.
-     * You can use it to initialize variables, sensors or similar.
-     */
-    void setup() {
-      //Serial.println("Hello from my usermod!");
-    }
+    void setup() { }
 
 
     /*
      * connected() is called every time the WiFi is (re)connected
      * Use it to initialize network interfaces
      */
-    void connected() {
-      DEBUG_PRINTLN("Sandtable is online 🥳");
-    }
+    void connected() override;
 
 
     /*
@@ -67,17 +59,7 @@ class Sandtable : public Usermod {
      * 2. Try to avoid using the delay() function. NEVER use delays longer than 10 milliseconds.
      *    Instead, use a timer check as shown here.
      */
-    void loop() {
-      if (millis() - lastTime > 1000) {
-        //Serial.println("I'm alive!");
-        lastTime = millis();
-      }
-
-      // TODO: Read line from Serial2
-      const char* line = "my line";
-
-      _currentState = _currentState.ProcessLine(line, sizeof(line));
-    }
+    void loop();
 
 
     /*
@@ -85,38 +67,35 @@ class Sandtable : public Usermod {
      * Creating an "u" object allows you to add custom key/value pairs to the Info section of the WLED web UI.
      * Below it is shown how this could be used for e.g. a light sensor
      */
-    /*
-    void addToJsonInfo(JsonObject& root)
-    {
-      int reading = 20;
-      //this code adds "u":{"Light":[20," lux"]} to the info object
-      JsonObject user = root["u"];
-      if (user.isNull()) user = root.createNestedObject("u");
+    // void addToJsonInfo(JsonObject& root) override {
+    //   // int reading = 20;
+    //   // //this code adds "u":{"Light":[20," lux"]} to the info object
+    //   // JsonObject user = root["u"];
+    //   // if (user.isNull()) user = root.createNestedObject("u");
 
-      JsonArray lightArr = user.createNestedArray("Light"); //name
-      lightArr.add(reading); //value
-      lightArr.add(" lux"); //unit
-    }
-    */
+    //   // JsonArray lightArr = user.createNestedArray("Light"); //name
+    //   // lightArr.add(reading); //value
+    //   // lightArr.add(" lux"); //unit
+    // }
 
 
     /*
      * addToJsonState() can be used to add custom entries to the /json/state part of the JSON API (state object).
      * Values in the state object may be modified by connected clients
      */
-    void addToJsonState(JsonObject& root) {
-      //root["user0"] = userVar0;
-    }
+    // void addToJsonState(JsonObject& root) override {
+    //   //root["user0"] = userVar0;
+    // }
 
 
     /*
      * readFromJsonState() can be used to receive data clients send to the /json/state part of the JSON API (state object).
      * Values in the state object may be modified by connected clients
      */
-    void readFromJsonState(JsonObject& root) {
-      // userVar0 = root["user0"] | userVar0; //if "user0" key exists in JSON, update, else keep old value
-      //if (root["bri"] == 255) Serial.println(F("Don't burn down your garage!"));
-    }
+    // void readFromJsonState(JsonObject& root) override {
+    //   // userVar0 = root["user0"] | userVar0; //if "user0" key exists in JSON, update, else keep old value
+    //   //if (root["bri"] == 255) Serial.println(F("Don't burn down your garage!"));
+    // }
 
 
     /*
@@ -154,15 +133,7 @@ class Sandtable : public Usermod {
      * 
      * I highly recommend checking out the basics of ArduinoJson serialization and deserialization in order to use custom settings!
      */
-    void addToConfig(JsonObject& root) {
-      JsonObject top = root.createNestedObject(FPSTR(_configRootKey));
-      top[FPSTR(_configRxPinKey)] = _rxPin;
-      top[FPSTR(_configTxPinKey)] = _txPin;
-
-      // JsonArray pinArray = top.createNestedArray(FPSTR(_pinsSection));
-      // pinArray.add(_rxPin);
-      // pinArray.add(_txPin); 
-    }
+    void addToConfig(JsonObject& root) override;
 
 
     /*
@@ -180,33 +151,7 @@ class Sandtable : public Usermod {
      * 
      * This function is guaranteed to be called on boot, but could also be called every time settings are updated
      */
-    bool readFromConfig(JsonObject& root) {
-      // default settings values could be set here (or below using the 3-argument getJsonValue()) instead of in the class definition or constructor
-      // setting them inside readFromConfig() is slightly more robust, handling the rare but plausible use case of single value being missing after boot (e.g. if the cfg.json was manually edited and a value was removed)
-      uint8_t previousRxPin = _rxPin;
-      uint8_t previousTxPin = _txPin;
-
-      JsonObject top = root[FPSTR(_configRootKey)];
-
-      bool configComplete = !top.isNull();
-
-      configComplete &= getJsonValue(top[FPSTR(_configRxPinKey)], _rxPin, UART2_RX_PIN);
-      configComplete &= getJsonValue(top[FPSTR(_configTxPinKey)], _txPin, UART2_TX_PIN);
-
-      // configComplete &= getJsonValue(top[FPSTR(_pinsSection)][0], _rxPin, UART2_RX_PIN);
-      // configComplete &= getJsonValue(top[FPSTR(_pinsSection)][1], _txPin, UART2_TX_PIN);
-
-      if (_rxPin != previousRxPin || _txPin != previousTxPin) {
-        if (_rxPin == NO_PIN || _txPin == NO_PIN) {
-          Serial2.end();
-
-        } else {
-          Serial2.begin(115200, SERIAL_8N1, _rxPin, _txPin);
-        }
-      }
-
-      return configComplete;
-    }
+    bool readFromConfig(JsonObject& root) override;
 
 
     /*
@@ -214,20 +159,14 @@ class Sandtable : public Usermod {
      * Use this to blank out some LEDs or set them to a different color regardless of the set effect mode.
      * Commonly used for custom clocks (Cronixie, 7 segment)
      */
-    void handleOverlayDraw() {
-      //strip.setPixelColor(0, RGBW32(0,0,0,0)) // set the first pixel to black
-    }
+    // void handleOverlayDraw() override {
+    //   //strip.setPixelColor(0, RGBW32(0,0,0,0)) // set the first pixel to black
+    // }
 
    
     /*
      * getId() allows you to optionally give your V2 usermod an unique ID (please define it in const.h!).
      * This could be used in the future for the system to determine whether your usermod is installed.
      */
-    uint16_t getId() {
-      return USERMOD_ID_SANDTABLE;
-    }
+    uint16_t getId() override { return USERMOD_ID_SANDTABLE; }
 };
-
-const char Sandtable::_configRootKey[]        PROGMEM = "Sandtable";
-const char Sandtable::_configRxPinKey[]       PROGMEM = "Rx-pin";
-const char Sandtable::_configTxPinKey[]       PROGMEM = "Tx-pin";

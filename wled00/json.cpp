@@ -723,8 +723,8 @@ void serializeInfo(JsonObject root)
   #endif
   root[F("opt")] = os;
 
-  root[F("brand")] = "WLED";
-  root[F("product")] = F("FOSS");
+  root[F("brand")] = "MakerSpace Minden";
+  root[F("product")] = "Sandtisch";
   root["mac"] = escapedMac;
   char s[16] = "";
   if (Network.isConnected())
