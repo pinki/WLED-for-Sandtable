@@ -16,7 +16,7 @@ State* IdleState::ProcessLine(const String& line) {
         return runState.ProcessLine(line);
     }
 
-    if (_motorPowerState == MotorPowerState::On) {
+    if (_motorPowerState != MotorPowerState::Off) {
         switch (_disableMotorsCommandState) {
             case CommandState::NotSent:
                 DEBUG_PRINTLN(F("ST> ❌ Disabling motors"));
@@ -33,7 +33,7 @@ State* IdleState::ProcessLine(const String& line) {
 
             case CommandState::Acknowledged:
                 DEBUG_PRINTLN(F("ST> 🚨 Unexpected state: Motor on and off command acknowledged"));
-                // Here is intentionally no break to return initial state
+                // Here is intentionally no break to return initial state in default case
 
             default:
                 DEBUG_PRINTLN(F("ST> 🚨 UNKNOWN CONDITION! RETURNING TO INITIAL STATE! 🚨"));

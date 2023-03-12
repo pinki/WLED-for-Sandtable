@@ -1,23 +1,28 @@
 #include "wled.h"
 
 #include "InitialState.hpp"
+#include "IdleState.hpp"
+#include "RunState.hpp"
 #include "AutoHomeState.hpp"
 
 InitialState initialState;
 
 State* InitialState::ProcessLine(const String& line) {
     if (millis() - _activeSince > SANDTABLE_MAX_TIME_IN_INITIAL_STATE_BEFORE_REBOOT) {
-        // Reset FluidNC
-        DEBUG_PRINTLN(F("ST> Initial state :: Resetting FluidNC...\n"));
-        Serial2.println(FPSTR(GCode::RebootSystemCommand));
-
-        _bootStage = 0;
-        activate();
+        resetSandtable();
     }
 
     switch (_bootStage) {
         case 0:
-            if (line.startsWith(F("[MSG:INFO: FluidNC v"))) {
+            if (line.startsWith(FPSTR(IdleState::IndicatorLineStart))) {
+                idleState.activate();
+                return &idleState;
+
+            } else if (line.startsWith(FPSTR(RunState::IndicatorLineStart))) {
+                runState.activate();
+                return &runState;
+
+            } else if (line.startsWith(F("[MSG:INFO: FluidNC v"))) {
                 _motorPowerState = MotorPowerState::Off;
                 _bootStage++;
             }
@@ -49,4 +54,18 @@ State* InitialState::ProcessLine(const String& line) {
     }
 
     return this;
+}
+
+void InitialState::resetSandtable() {
+    DEBUG_PRINTLN(F("ST> Initial state :: Resetting FluidNC...\n"));
+    Serial2.println(FPSTR(GCode::RebootSystemCommand));
+
+    _bootStage = 0;
+    activate();
+}
+
+void InitialState::activate() {
+    State::activate();
+
+    _motorPowerState = MotorPowerState::Unknown;
 }

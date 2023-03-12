@@ -24,10 +24,8 @@ void Sandtable::loop() {
     } else if (_stateQueryInterval > 0 && millis() - lastTime > _stateQueryInterval) {
         lastTime = millis();
 
-        _currentState = _currentState->ProcessLine(" ");
-
-        // DEBUG_PRINTLN(F("ST> Querying state"));
-        // Serial2.println(FPSTR(GCode::StateCommand));
+        DEBUG_PRINTLN(F("ST> Querying state"));
+        Serial2.println(FPSTR(GCode::StateCommand));
     }
 }
 

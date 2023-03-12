@@ -9,6 +9,8 @@ class RunState : public State {
         State* ProcessLine(const String& line) override;
 
         const char* getName() override { return "Run"; }
+
+        void activate() override;
 };
 
 extern RunState runState;

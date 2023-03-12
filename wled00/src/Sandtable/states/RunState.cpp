@@ -20,3 +20,9 @@ State* RunState::ProcessLine(const String& line) {
 
     return this;
 }
+
+void RunState::activate() {
+    State::activate();
+
+    _motorPowerState = MotorPowerState::On;
+}
