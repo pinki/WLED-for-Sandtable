@@ -1,14 +1,15 @@
 #include "wled.h"
 
 #include "InitialState.hpp"
+#include "AutoHomeState.hpp"
 #include "IdleState.hpp"
 #include "RunState.hpp"
-#include "AutoHomeState.hpp"
+#include "PlaylistState.hpp"
 
 InitialState initialState;
 
 State* InitialState::ProcessLine(const String& line) {
-    if (millis() - _activeSince > SANDTABLE_MAX_TIME_IN_INITIAL_STATE_BEFORE_REBOOT) {
+    if (millis() - _activeSince > _configuration.allowedBootUpTimeInSeconds * 1000) {
         resetSandtable();
     }
 
@@ -42,10 +43,24 @@ State* InitialState::ProcessLine(const String& line) {
 
         case 3:
             if (line.equals(F("[MSG:INFO: '$H'|'$X' to unlock]"))) {
-                DEBUG_PRINTF(NewStatePrintfDebugLine, autoHomeState.getName());
+                if (_configuration.doAutoHome) {
+                    DEBUG_PRINTF(NewStatePrintfDebugLine, autoHomeState.getName());
 
-                autoHomeState.activate();
-                return &autoHomeState;
+                    autoHomeState.activate();
+                    return &autoHomeState;
+
+                } else if (_configuration.isPlaylistActive) {
+                    DEBUG_PRINTF(NewStatePrintfDebugLine, playlistState.getName());
+
+                    playlistState.activate();
+                    return &playlistState;
+
+                } else {
+                    DEBUG_PRINTF(NewStatePrintfDebugLine, idleState.getName());
+
+                    idleState.activate();
+                    return &idleState;
+                }
             }
             break;
         

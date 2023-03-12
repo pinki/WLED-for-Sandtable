@@ -2,8 +2,6 @@
 
 #include "State.hpp"
 
-#define SANDTABLE_MAX_TIME_IN_INITIAL_STATE_BEFORE_REBOOT   15000
-
 class InitialState : public State {
     private:
         uint8_t _bootStage = 0;

@@ -3,6 +3,7 @@
 #include "IdleState.hpp"
 #include "InitialState.hpp"
 #include "RunState.hpp"
+#include "PlaylistState.hpp"
 
 IdleState idleState;
 
@@ -14,9 +15,14 @@ State* IdleState::ProcessLine(const String& line) {
 
         runState.activate();
         return runState.ProcessLine(line);
-    }
 
-    if (_motorPowerState != MotorPowerState::Off) {
+    } else if (_configuration.isPlaylistActive) {
+        DEBUG_PRINTF(NewStatePrintfDebugLine, playlistState.getName());
+
+        playlistState.activate();
+        return playlistState.ProcessLine(line);
+
+    } else if (_motorPowerState != MotorPowerState::Off) {
         switch (_disableMotorsCommandState) {
             case CommandState::NotSent:
                 DEBUG_PRINTLN(F("ST> ❌ Disabling motors"));
