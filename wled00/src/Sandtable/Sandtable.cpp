@@ -34,11 +34,17 @@ void Sandtable::connected() {
 }
 
 void Sandtable::addToConfig(JsonObject& root) {
+    auto stateConfig = State::getConfiguration();
+
     JsonObject top = root.createNestedObject(FPSTR(_configRootKey));
     top[FPSTR(_configRxPinKey)] = _rxPin;
     top[FPSTR(_configTxPinKey)] = _txPin;
 
-    top[FPSTR(_stateQueryIntervalKey)] = _stateQueryInterval;
+    top[FPSTR(_configAllowedBootTimeInSecondsKey)] = stateConfig->allowedBootUpTimeInSeconds;
+    top[FPSTR(_configStateQueryIntervalKey)] = _stateQueryInterval;
+
+    top[FPSTR(_configIsPlaylistActiveKey)] = stateConfig->isPlaylistActive;
+    top[FPSTR(_configDoAutoHomeKey)] = stateConfig->doAutoHome;
 
     // JsonArray pinArray = top.createNestedArray(FPSTR(_pinsSection));
     // pinArray.add(_rxPin);
@@ -70,13 +76,23 @@ bool Sandtable::readFromConfig(JsonObject& root) {
         }
     }
 
-    configComplete &= getJsonValue(top[FPSTR(_stateQueryIntervalKey)], _stateQueryInterval, 3000);
+    static const SandtableConfiguration defaultStateConfig;
+    auto stateConfig = State::getConfiguration();
+
+    configComplete &= getJsonValue(top[FPSTR(_configStateQueryIntervalKey)], _stateQueryInterval, 3000);
+    configComplete &= getJsonValue(top[FPSTR(_configAllowedBootTimeInSecondsKey)], stateConfig->allowedBootUpTimeInSeconds, defaultStateConfig.allowedBootUpTimeInSeconds);
+
+    configComplete &= getJsonValue(top[FPSTR(_configIsPlaylistActiveKey)], stateConfig->isPlaylistActive, defaultStateConfig.isPlaylistActive);
+    configComplete &= getJsonValue(top[FPSTR(_configDoAutoHomeKey)], stateConfig->doAutoHome, defaultStateConfig.doAutoHome);
 
     return configComplete;
 }
 
 
-const char Sandtable::_configRootKey[]         PROGMEM = "Sandtable";
-const char Sandtable::_configRxPinKey[]        PROGMEM = "Rx-pin";
-const char Sandtable::_configTxPinKey[]        PROGMEM = "Tx-pin";
-const char Sandtable::_stateQueryIntervalKey[] PROGMEM = "StateQueryInterval";
+const char Sandtable::_configRootKey[]                     PROGMEM = "Sandtable";
+const char Sandtable::_configRxPinKey[]                    PROGMEM = "Rx-pin";
+const char Sandtable::_configTxPinKey[]                    PROGMEM = "Tx-pin";
+const char Sandtable::_configStateQueryIntervalKey[]       PROGMEM = "StateQueryInterval";
+const char Sandtable::_configIsPlaylistActiveKey[]         PROGMEM = "IsPlaylistActive";
+const char Sandtable::_configDoAutoHomeKey[]               PROGMEM = "DoAutoHome";
+const char Sandtable::_configAllowedBootTimeInSecondsKey[] PROGMEM = "AllowedBootTimeInSeconds";

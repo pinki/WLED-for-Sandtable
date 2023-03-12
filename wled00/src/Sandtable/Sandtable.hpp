@@ -30,7 +30,10 @@ class Sandtable : public Usermod {
     static const char _configRootKey[];
     static const char _configRxPinKey[];
     static const char _configTxPinKey[];
-    static const char _stateQueryIntervalKey[];
+    static const char _configStateQueryIntervalKey[];
+    static const char _configIsPlaylistActiveKey[];
+    static const char _configDoAutoHomeKey[];
+    static const char _configAllowedBootTimeInSecondsKey[];
     
     State* _currentState = &initialState;
 
