@@ -2,6 +2,7 @@
 
 #include "RunState.hpp"
 #include "IdleState.hpp"
+#include "PlaylistState.hpp"
 #include "../gcodes.hpp"
 
 RunState runState;
@@ -9,9 +10,13 @@ RunState runState;
 const char RunState::IndicatorLineStart[] PROGMEM = "<Run|";
 
 State* RunState::ProcessLine(const String& line) {
-    if (line.startsWith(FPSTR(IdleState::IndicatorLineStart))) {
-        // TODO: Start next playlist entry
+    if (_configuration.isPlaylistActive) {
+        DEBUG_PRINTF(NewStatePrintfDebugLine, playlistState.getName());
 
+        playlistState.activate();
+        return playlistState.ProcessLine(line);
+
+    } else if (line.startsWith(FPSTR(IdleState::IndicatorLineStart))) {
         DEBUG_PRINTF(NewStatePrintfDebugLine, idleState.getName());
 
         idleState.activate();
