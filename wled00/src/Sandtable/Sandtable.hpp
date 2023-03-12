@@ -5,8 +5,6 @@
 #include "pins.h"
 #include "states/InitialState.hpp"
 
-#define SANDTABLE_LINE_BUFFER_SIZE  64
-
 /*
  * Usermods allow you to add own functionality to WLED more easily
  * See: https://github.com/Aircoookie/WLED/wiki/Add-own-functionality
@@ -27,26 +25,24 @@
 
 class Sandtable : public Usermod {
   private:
+    static const uint8_t SANDTABLE_LINE_BUFFER_SIZE = 128;
+
     static const char _configRootKey[];
     static const char _configRxPinKey[];
     static const char _configTxPinKey[];
+    static const char _stateQueryIntervalKey[];
     
-    State& _currentState = initialState;
+    State* _currentState = &initialState;
 
     int8_t _rxPin = PIN_NOT_SET;
     int8_t _txPin = PIN_NOT_SET;
 
+    uint32_t _stateQueryInterval = 0;
+
     unsigned long lastTime = 0;
 
   public:
-    void setup() { }
-
-
-    /*
-     * connected() is called every time the WiFi is (re)connected
-     * Use it to initialize network interfaces
-     */
-    void connected() override;
+    void setup();
 
 
     /*
@@ -60,6 +56,13 @@ class Sandtable : public Usermod {
      *    Instead, use a timer check as shown here.
      */
     void loop();
+
+
+    /*
+     * connected() is called every time the WiFi is (re)connected
+     * Use it to initialize network interfaces
+     */
+    void connected() override;
 
 
     /*

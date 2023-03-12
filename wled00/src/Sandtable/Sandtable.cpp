@@ -1,30 +1,46 @@
 #include "Sandtable.hpp"
 
-void Sandtable::connected() {
-    DEBUG_PRINTLN("Sandtable is online 🥳");
+void Sandtable::setup() {
+    lastTime = millis();
 }
 
 void Sandtable::loop() {
-    if (millis() - lastTime > 1000) {
-        //Serial.println("I'm alive!");
-        lastTime = millis();
-    }
-
     if (Serial2.available()) {
-        String line = Serial2.readStringUntil('\n');
+        lastTime = millis();
+
+        String line = Serial2.readStringUntil('\r');
+        {
+            // Skip \n
+            static char notInUse[1];
+            Serial2.readBytes(notInUse, 1);
+        }
 
         if (line.length()) {
-            // DEBUG_PRINTF("ST> %s state is processing line: %s\n", _currentState.getName().c_str(), line.c_str());
+            DEBUG_PRINTF("ST> %s state is processing line: %s\n", _currentState->getName(), line.c_str());
 
-            // _currentState = _currentState.ProcessLine(line);
+            _currentState = _currentState->ProcessLine(line);
         }
+
+    } else if (_stateQueryInterval > 0 && millis() - lastTime > _stateQueryInterval) {
+        lastTime = millis();
+
+        _currentState = _currentState->ProcessLine(" ");
+
+        // DEBUG_PRINTLN(F("ST> Querying state"));
+        // Serial2.println(FPSTR(GCode::StateCommand));
     }
+}
+
+void Sandtable::connected() {
+    DEBUG_PRINTLN(F("Sandtable is online 🥳"));
 }
 
 void Sandtable::addToConfig(JsonObject& root) {
     JsonObject top = root.createNestedObject(FPSTR(_configRootKey));
     top[FPSTR(_configRxPinKey)] = _rxPin;
     top[FPSTR(_configTxPinKey)] = _txPin;
+
+    top[FPSTR(_stateQueryIntervalKey)] = _stateQueryInterval;
 
     // JsonArray pinArray = top.createNestedArray(FPSTR(_pinsSection));
     // pinArray.add(_rxPin);
@@ -56,10 +72,13 @@ bool Sandtable::readFromConfig(JsonObject& root) {
         }
     }
 
+    configComplete &= getJsonValue(top[FPSTR(_stateQueryIntervalKey)], _stateQueryInterval, 3000);
+
     return configComplete;
 }
 
 
-const char Sandtable::_configRootKey[]  PROGMEM = "Sandtable";
-const char Sandtable::_configRxPinKey[] PROGMEM = "Rx-pin";
-const char Sandtable::_configTxPinKey[] PROGMEM = "Tx-pin";
+const char Sandtable::_configRootKey[]         PROGMEM = "Sandtable";
+const char Sandtable::_configRxPinKey[]        PROGMEM = "Rx-pin";
+const char Sandtable::_configTxPinKey[]        PROGMEM = "Tx-pin";
+const char Sandtable::_stateQueryIntervalKey[] PROGMEM = "StateQueryInterval";

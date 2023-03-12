@@ -3,12 +3,15 @@
 #include "State.hpp"
 
 class IdleState : public State {
-    public:
-        State& ProcessLine(const String& line) override {
-            return *this;
-        }
+    private:
+        CommandState _disableMotorsCommandState = CommandState::NotSent;
 
-        String getName() override { return "Idle"; }
+    public:
+        static const char IndicatorLineStart[];
+
+        State* ProcessLine(const String& line) override;
+
+        const char* getName() override { return "Idle"; }
 };
 
 extern IdleState idleState;

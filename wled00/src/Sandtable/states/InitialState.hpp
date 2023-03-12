@@ -2,16 +2,16 @@
 
 #include "State.hpp"
 
-#define SANDTABLE_MAX_TIME_IN_INITIAL_STATE_BEFORE_REBOOT   2000
+#define SANDTABLE_MAX_TIME_IN_INITIAL_STATE_BEFORE_REBOOT   10000
 
 class InitialState : public State {
     private:
         uint8_t _bootStage = 0;
 
     public:
-        State& ProcessLine(const String& line) override;
+        State* ProcessLine(const String& line) override;
 
-        String getName() override { return "Initial"; }
+        const char* getName() override { return "Initial"; }
 };
 
 extern InitialState initialState;
