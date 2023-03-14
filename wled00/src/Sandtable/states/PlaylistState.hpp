@@ -1,12 +1,25 @@
 #pragma once
 
+#include <vector>
+
 #include "State.hpp"
 
-class PlaylistState : public State {
-    public:
-        State* ProcessLine(const String& line) override;
+namespace SandtableUsermod {
+    typedef struct PlaylistEntry {
+        String filename = "";
+        uint8_t presetId = 0;
+        bool eraseAfter = true;
+    } PlaylistEntry;
 
-        const char* getName() override { return "Playlist"; }
-};
+    class PlaylistState : public State {
+        private:
+            std::vector<PlaylistEntry> _playlist;
 
-extern PlaylistState playlistState;
+        public:
+            State* ProcessLine(const String& line) override;
+
+            const char* getName() override { return "Playlist"; }
+    };
+
+    extern PlaylistState playlistState;
+}

@@ -6,7 +6,9 @@
 #include "RunState.hpp"
 #include "PlaylistState.hpp"
 
-InitialState initialState;
+using namespace SandtableUsermod;
+
+InitialState SandtableUsermod::initialState;
 
 State* InitialState::ProcessLine(const String& line) {
     if (millis() - _activeSince > _configuration.allowedBootUpTimeInSeconds * 1000) {

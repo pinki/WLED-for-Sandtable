@@ -1,5 +1,7 @@
 #include "Sandtable.hpp"
 
+using namespace SandtableUsermod;
+
 void Sandtable::setup() {
     lastTime = millis();
 }
@@ -46,6 +48,9 @@ void Sandtable::addToConfig(JsonObject& root) {
     top[FPSTR(_configIsPlaylistActiveKey)] = stateConfig->isPlaylistActive;
     top[FPSTR(_configDoAutoHomeKey)] = stateConfig->doAutoHome;
 
+    top[FPSTR(_configPatternsFolderKey)] = stateConfig->patternsFolder;
+    top[FPSTR(_configErasePatternsFolderKey)] = stateConfig->erasePatternsFolder;
+
     // JsonArray pinArray = top.createNestedArray(FPSTR(_pinsSection));
     // pinArray.add(_rxPin);
     // pinArray.add(_txPin); 
@@ -68,7 +73,7 @@ bool Sandtable::readFromConfig(JsonObject& root) {
     // configComplete &= getJsonValue(top[FPSTR(_pinsSection)][1], _txPin, UART2_TX_PIN);
 
     if (_rxPin != previousRxPin || _txPin != previousTxPin) {
-        if (_rxPin == NO_PIN || _txPin == NO_PIN) {
+        if (_rxPin == PIN_NOT_SET || _txPin == PIN_NOT_SET) {
             Serial2.end();
 
         } else {
@@ -85,6 +90,9 @@ bool Sandtable::readFromConfig(JsonObject& root) {
     configComplete &= getJsonValue(top[FPSTR(_configIsPlaylistActiveKey)], stateConfig->isPlaylistActive, defaultStateConfig.isPlaylistActive);
     configComplete &= getJsonValue(top[FPSTR(_configDoAutoHomeKey)], stateConfig->doAutoHome, defaultStateConfig.doAutoHome);
 
+    configComplete &= getJsonValue(top[FPSTR(_configPatternsFolderKey)], stateConfig->patternsFolder, defaultStateConfig.patternsFolder);
+    configComplete &= getJsonValue(top[FPSTR(_configErasePatternsFolderKey)], stateConfig->erasePatternsFolder, defaultStateConfig.erasePatternsFolder);
+
     return configComplete;
 }
 
@@ -96,3 +104,5 @@ const char Sandtable::_configStateQueryIntervalKey[]       PROGMEM = "StateQuery
 const char Sandtable::_configIsPlaylistActiveKey[]         PROGMEM = "IsPlaylistActive";
 const char Sandtable::_configDoAutoHomeKey[]               PROGMEM = "DoAutoHome";
 const char Sandtable::_configAllowedBootTimeInSecondsKey[] PROGMEM = "AllowedBootTimeInSeconds";
+const char Sandtable::_configPatternsFolderKey[]           PROGMEM = "PatternsFolder";
+const char Sandtable::_configErasePatternsFolderKey[]     PROGMEM = "ErasePatternsFolder";

@@ -2,18 +2,20 @@
 
 #include "State.hpp"
 
-class InitialState : public State {
-    private:
-        uint8_t _bootStage = 0;
+namespace SandtableUsermod {
+    class InitialState : public State {
+        private:
+            uint8_t _bootStage = 0;
 
-        void resetSandtable();
+            void resetSandtable();
 
-    public:
-        State* ProcessLine(const String& line) override;
+        public:
+            State* ProcessLine(const String& line) override;
 
-        const char* getName() override { return "Initial"; }
+            const char* getName() override { return "Initial"; }
 
-        void activate() override;
-};
+            void activate() override;
+    };
 
-extern InitialState initialState;
+    extern InitialState initialState;
+}

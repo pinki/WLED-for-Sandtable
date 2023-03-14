@@ -354,6 +354,6 @@ void registerUsermods()
   #endif
 
   #ifdef USERMOD_SANDTABLE
-  usermods.add(new Sandtable());
+  usermods.add(new SandtableUsermod::Sandtable());
   #endif
 }

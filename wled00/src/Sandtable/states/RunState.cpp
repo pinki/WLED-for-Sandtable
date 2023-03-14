@@ -5,7 +5,9 @@
 #include "PlaylistState.hpp"
 #include "../gcodes.hpp"
 
-RunState runState;
+using namespace SandtableUsermod;
+
+RunState SandtableUsermod::runState;
 
 const char RunState::IndicatorLineStart[] PROGMEM = "<Run|";
 

@@ -2,6 +2,8 @@
 
 #include "State.hpp"
 
+using namespace SandtableUsermod;
+
 MotorPowerState State::_motorPowerState = MotorPowerState::Unknown;
 SandtableConfiguration State::_configuration = SandtableConfiguration();
 

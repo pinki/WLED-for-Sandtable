@@ -1,6 +1,8 @@
 #include "PlaylistState.hpp"
 
-PlaylistState playlistState;
+using namespace SandtableUsermod;
+
+PlaylistState SandtableUsermod::playlistState;
 
 State* PlaylistState::ProcessLine(const String& line) {
     return this;

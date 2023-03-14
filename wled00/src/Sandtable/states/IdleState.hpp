@@ -2,16 +2,18 @@
 
 #include "State.hpp"
 
-class IdleState : public State {
-    private:
-        CommandState _disableMotorsCommandState = CommandState::NotSent;
+namespace SandtableUsermod {
+    class IdleState : public State {
+        private:
+            CommandState _disableMotorsCommandState = CommandState::NotSent;
 
-    public:
-        static const char IndicatorLineStart[];
+        public:
+            static const char IndicatorLineStart[];
 
-        State* ProcessLine(const String& line) override;
+            State* ProcessLine(const String& line) override;
 
-        const char* getName() override { return "Idle"; }
-};
+            const char* getName() override { return "Idle"; }
+    };
 
-extern IdleState idleState;
+    extern IdleState idleState;
+}

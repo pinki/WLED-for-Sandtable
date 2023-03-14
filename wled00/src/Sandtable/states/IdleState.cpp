@@ -5,7 +5,9 @@
 #include "RunState.hpp"
 #include "PlaylistState.hpp"
 
-IdleState idleState;
+using namespace SandtableUsermod;
+
+IdleState SandtableUsermod::idleState;
 
 const char IdleState::IndicatorLineStart[] PROGMEM = "<Idle|";
 

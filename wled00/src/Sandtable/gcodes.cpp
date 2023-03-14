@@ -2,6 +2,8 @@
 
 #include "gcodes.hpp"
 
+using namespace SandtableUsermod;
+
 const char GCode::HomeCommand[]          PROGMEM = "$Home";
 const char GCode::StateCommand[]         PROGMEM = "?";
 const char GCode::RebootSystemCommand[]  PROGMEM = "$Bye";

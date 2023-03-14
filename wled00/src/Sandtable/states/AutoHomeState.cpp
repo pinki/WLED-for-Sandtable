@@ -5,7 +5,9 @@
 #include "IdleState.hpp"
 #include "../gcodes.hpp"
 
-AutoHomeState autoHomeState;
+using namespace SandtableUsermod;
+
+AutoHomeState SandtableUsermod::autoHomeState;
 
 State* AutoHomeState::ProcessLine(const String& line) {
     switch (_homingState) {
