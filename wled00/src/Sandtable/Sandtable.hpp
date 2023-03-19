@@ -27,16 +27,6 @@ namespace SandtableUsermod {
   class Sandtable : public Usermod {
     private:
       static const uint8_t SANDTABLE_LINE_BUFFER_SIZE = 128;
-
-      static const char _configRootKey[];
-      static const char _configRxPinKey[];
-      static const char _configTxPinKey[];
-      static const char _configStateQueryIntervalKey[];
-      static const char _configIsPlaylistActiveKey[];
-      static const char _configDoAutoHomeKey[];
-      static const char _configAllowedBootTimeInSecondsKey[];
-      static const char _configPatternsFolderKey[];
-      static const char _configErasePatternsFolderKey[];
       
       State* _currentState = &initialState;
 
@@ -49,7 +39,6 @@ namespace SandtableUsermod {
 
     public:
       void setup();
-
 
       /*
       * loop() is called continuously. Here you can check for events, read sensors, etc.
@@ -92,19 +81,13 @@ namespace SandtableUsermod {
       * addToJsonState() can be used to add custom entries to the /json/state part of the JSON API (state object).
       * Values in the state object may be modified by connected clients
       */
-      // void addToJsonState(JsonObject& root) override {
-      //   //root["user0"] = userVar0;
-      // }
-
+      void addToJsonState(JsonObject& root) override;
 
       /*
       * readFromJsonState() can be used to receive data clients send to the /json/state part of the JSON API (state object).
       * Values in the state object may be modified by connected clients
       */
-      // void readFromJsonState(JsonObject& root) override {
-      //   // userVar0 = root["user0"] | userVar0; //if "user0" key exists in JSON, update, else keep old value
-      //   //if (root["bri"] == 255) Serial.println(F("Don't burn down your garage!"));
-      // }
+      void readFromJsonState(JsonObject& root) override;
 
 
       /*
@@ -143,7 +126,6 @@ namespace SandtableUsermod {
       * I highly recommend checking out the basics of ArduinoJson serialization and deserialization in order to use custom settings!
       */
       void addToConfig(JsonObject& root) override;
-
 
       /*
       * readFromConfig() can be used to read back the custom settings you added with addToConfig().

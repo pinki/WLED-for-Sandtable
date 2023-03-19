@@ -1,4 +1,6 @@
 #include "Sandtable.hpp"
+#include "JsonKeys.hpp"
+#include "states/PlaylistState.hpp"
 
 using namespace SandtableUsermod;
 
@@ -28,6 +30,14 @@ void Sandtable::loop() {
 
         DEBUG_PRINTLN(F("ST> Querying state"));
         Serial2.println(FPSTR(GCode::StateCommand));
+
+
+        uint8_t index = 0;
+        auto playlist = playlistState.getPlaylist();
+        DEBUG_PRINTF("ST> Playlist (%hhu Updates):\n", playlistState.getUpdateCount());
+        for (auto playlistItem : playlist) {
+            DEBUG_PRINTF("ST> ✏️  Entry %hhu of %u: %s (%hhu)\n", ++index, playlist.capacity(), playlistItem.filepath.c_str(), playlistItem.presetId);
+        }
     }
 }
 
@@ -35,25 +45,68 @@ void Sandtable::connected() {
     DEBUG_PRINTLN(F("Sandtable is online 🥳"));
 }
 
+void Sandtable::addToJsonState(JsonObject& root) {
+    auto stateConfig = State::getConfiguration();
+
+    JsonObject top = root.createNestedObject(FPSTR(JsonKeys::configRootKey));
+
+    top[FPSTR(JsonKeys::configStateQueryIntervalKey)] = _stateQueryInterval;
+
+    top[FPSTR(JsonKeys::configIsPlaylistActiveKey)] = stateConfig->isPlaylistActive;
+    top[FPSTR(JsonKeys::configDoAutoHomeKey)] = stateConfig->doAutoHome;
+
+    top[FPSTR(JsonKeys::configPatternsFolderKey)] = stateConfig->patternsFolder;
+    top[FPSTR(JsonKeys::configErasePatternsFolderKey)] = stateConfig->erasePatternsFolder;
+
+    playlistState.writePlaylist(top);
+}
+
+void Sandtable::readFromJsonState(JsonObject& root) {
+    auto stateConfig = State::getConfiguration();
+
+    JsonObject top = root[FPSTR(JsonKeys::configRootKey)];
+    if (top.isNull()) return;
+
+    auto stateQueryInterval = top[FPSTR(JsonKeys::configStateQueryIntervalKey)];
+    if (!stateQueryInterval.isNull() && stateQueryInterval.is<uint32_t>()) {
+        _stateQueryInterval = stateQueryInterval.as<uint32_t>();
+    }
+
+    // TODO: isPlaylistActive
+    auto doAutoHome = top[FPSTR(JsonKeys::configDoAutoHomeKey)];
+    if (!doAutoHome.isNull() && doAutoHome.is<bool>()) {
+        stateConfig->doAutoHome = doAutoHome.as<bool>();
+    }
+
+    auto patternFolder = top[FPSTR(JsonKeys::configPatternsFolderKey)];
+    if (!patternFolder.isNull() && patternFolder.is<String>()) {
+        stateConfig->patternsFolder = patternFolder.as<String>();
+    }
+    auto erasePatternsFolder = top[FPSTR(JsonKeys::configErasePatternsFolderKey)];
+    if (!erasePatternsFolder.isNull() && erasePatternsFolder.is<String>()) {
+        stateConfig->erasePatternsFolder = erasePatternsFolder.as<String>();
+    }
+
+    playlistState.updatePlaylist(top[FPSTR(JsonKeys::configPlaylistKey)]);
+}
+
 void Sandtable::addToConfig(JsonObject& root) {
     auto stateConfig = State::getConfiguration();
 
-    JsonObject top = root.createNestedObject(FPSTR(_configRootKey));
-    top[FPSTR(_configRxPinKey)] = _rxPin;
-    top[FPSTR(_configTxPinKey)] = _txPin;
+    JsonObject top = root.createNestedObject(FPSTR(JsonKeys::configRootKey));
+    top[FPSTR(JsonKeys::configRxPinKey)] = _rxPin;
+    top[FPSTR(JsonKeys::configTxPinKey)] = _txPin;
 
-    top[FPSTR(_configAllowedBootTimeInSecondsKey)] = stateConfig->allowedBootUpTimeInSeconds;
-    top[FPSTR(_configStateQueryIntervalKey)] = _stateQueryInterval;
+    top[FPSTR(JsonKeys::configAllowedBootTimeInSecondsKey)] = stateConfig->allowedBootUpTimeInSeconds;
+    top[FPSTR(JsonKeys::configStateQueryIntervalKey)] = _stateQueryInterval;
 
-    top[FPSTR(_configIsPlaylistActiveKey)] = stateConfig->isPlaylistActive;
-    top[FPSTR(_configDoAutoHomeKey)] = stateConfig->doAutoHome;
+    top[FPSTR(JsonKeys::configIsPlaylistActiveKey)] = stateConfig->isPlaylistActive;
+    top[FPSTR(JsonKeys::configDoAutoHomeKey)] = stateConfig->doAutoHome;
 
-    top[FPSTR(_configPatternsFolderKey)] = stateConfig->patternsFolder;
-    top[FPSTR(_configErasePatternsFolderKey)] = stateConfig->erasePatternsFolder;
+    top[FPSTR(JsonKeys::configPatternsFolderKey)] = stateConfig->patternsFolder;
+    top[FPSTR(JsonKeys::configErasePatternsFolderKey)] = stateConfig->erasePatternsFolder;
 
-    // JsonArray pinArray = top.createNestedArray(FPSTR(_pinsSection));
-    // pinArray.add(_rxPin);
-    // pinArray.add(_txPin); 
+    playlistState.writePlaylist(top);
 }
 
 bool Sandtable::readFromConfig(JsonObject& root) {
@@ -62,15 +115,13 @@ bool Sandtable::readFromConfig(JsonObject& root) {
     uint8_t previousRxPin = _rxPin;
     uint8_t previousTxPin = _txPin;
 
-    JsonObject top = root[FPSTR(_configRootKey)];
+    JsonObject top = root[FPSTR(JsonKeys::configRootKey)];
 
+    // Read serial port pins
     bool configComplete = !top.isNull();
 
-    configComplete &= getJsonValue(top[FPSTR(_configRxPinKey)], _rxPin, UART2_RX_PIN);
-    configComplete &= getJsonValue(top[FPSTR(_configTxPinKey)], _txPin, UART2_TX_PIN);
-
-    // configComplete &= getJsonValue(top[FPSTR(_pinsSection)][0], _rxPin, UART2_RX_PIN);
-    // configComplete &= getJsonValue(top[FPSTR(_pinsSection)][1], _txPin, UART2_TX_PIN);
+    configComplete &= getJsonValue(top[FPSTR(JsonKeys::configRxPinKey)], _rxPin, UART2_RX_PIN);
+    configComplete &= getJsonValue(top[FPSTR(JsonKeys::configTxPinKey)], _txPin, UART2_TX_PIN);
 
     if (_rxPin != previousRxPin || _txPin != previousTxPin) {
         if (_rxPin == PIN_NOT_SET || _txPin == PIN_NOT_SET) {
@@ -81,28 +132,21 @@ bool Sandtable::readFromConfig(JsonObject& root) {
         }
     }
 
+    // Read general config
     static const SandtableConfiguration defaultStateConfig;
     auto stateConfig = State::getConfiguration();
 
-    configComplete &= getJsonValue(top[FPSTR(_configStateQueryIntervalKey)], _stateQueryInterval, 3000);
-    configComplete &= getJsonValue(top[FPSTR(_configAllowedBootTimeInSecondsKey)], stateConfig->allowedBootUpTimeInSeconds, defaultStateConfig.allowedBootUpTimeInSeconds);
+    configComplete &= getJsonValue(top[FPSTR(JsonKeys::configStateQueryIntervalKey)], _stateQueryInterval, 3000);
+    configComplete &= getJsonValue(top[FPSTR(JsonKeys::configAllowedBootTimeInSecondsKey)], stateConfig->allowedBootUpTimeInSeconds, defaultStateConfig.allowedBootUpTimeInSeconds);
 
-    configComplete &= getJsonValue(top[FPSTR(_configIsPlaylistActiveKey)], stateConfig->isPlaylistActive, defaultStateConfig.isPlaylistActive);
-    configComplete &= getJsonValue(top[FPSTR(_configDoAutoHomeKey)], stateConfig->doAutoHome, defaultStateConfig.doAutoHome);
+    configComplete &= getJsonValue(top[FPSTR(JsonKeys::configIsPlaylistActiveKey)], stateConfig->isPlaylistActive, defaultStateConfig.isPlaylistActive);
+    configComplete &= getJsonValue(top[FPSTR(JsonKeys::configDoAutoHomeKey)], stateConfig->doAutoHome, defaultStateConfig.doAutoHome);
 
-    configComplete &= getJsonValue(top[FPSTR(_configPatternsFolderKey)], stateConfig->patternsFolder, defaultStateConfig.patternsFolder);
-    configComplete &= getJsonValue(top[FPSTR(_configErasePatternsFolderKey)], stateConfig->erasePatternsFolder, defaultStateConfig.erasePatternsFolder);
+    configComplete &= getJsonValue(top[FPSTR(JsonKeys::configPatternsFolderKey)], stateConfig->patternsFolder, defaultStateConfig.patternsFolder);
+    configComplete &= getJsonValue(top[FPSTR(JsonKeys::configErasePatternsFolderKey)], stateConfig->erasePatternsFolder, defaultStateConfig.erasePatternsFolder);
+
+    // Read playlist
+    playlistState.updatePlaylist(top[FPSTR(JsonKeys::configPlaylistKey)]);
 
     return configComplete;
 }
-
-
-const char Sandtable::_configRootKey[]                     PROGMEM = "Sandtable";
-const char Sandtable::_configRxPinKey[]                    PROGMEM = "Rx-pin";
-const char Sandtable::_configTxPinKey[]                    PROGMEM = "Tx-pin";
-const char Sandtable::_configStateQueryIntervalKey[]       PROGMEM = "StateQueryInterval";
-const char Sandtable::_configIsPlaylistActiveKey[]         PROGMEM = "IsPlaylistActive";
-const char Sandtable::_configDoAutoHomeKey[]               PROGMEM = "DoAutoHome";
-const char Sandtable::_configAllowedBootTimeInSecondsKey[] PROGMEM = "AllowedBootTimeInSeconds";
-const char Sandtable::_configPatternsFolderKey[]           PROGMEM = "PatternsFolder";
-const char Sandtable::_configErasePatternsFolderKey[]     PROGMEM = "ErasePatternsFolder";

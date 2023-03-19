@@ -1,4 +1,5 @@
 #include "PlaylistState.hpp"
+#include "../JsonKeys.hpp"
 
 using namespace SandtableUsermod;
 
@@ -6,4 +7,57 @@ PlaylistState SandtableUsermod::playlistState;
 
 State* PlaylistState::ProcessLine(const String& line) {
     return this;
+}
+
+void PlaylistState::writePlaylist(const JsonObject& parentObject) {
+    JsonArray playlistArray = parentObject.createNestedArray(FPSTR(JsonKeys::configPlaylistKey));
+
+    for (auto playlistItem : _playlist) {
+        JsonObject playlistArrayItem = playlistArray.createNestedObject();
+        playlistArrayItem[FPSTR(JsonKeys::configPlaylistItemFilepathKey)]   = playlistItem.filepath;
+        playlistArrayItem[FPSTR(JsonKeys::configPlaylistItemPresetIdKey)]   = playlistItem.presetId;
+        playlistArrayItem[FPSTR(JsonKeys::configPlaylistItemEraseAfterKey)] = playlistItem.eraseAfter;
+    }
+}
+
+void PlaylistState::updatePlaylist(const JsonArray& playlistArray) {
+    if (playlistArray.isNull()) return;
+
+    std::vector<PlaylistEntry> readPlaylist;
+    for (size_t i = 0; i < playlistArray.size(); i++) {
+        JsonObject playlistItem = playlistArray.getElement(i);
+        if (playlistItem.isNull()) continue;
+        
+        auto filepath   = playlistItem[FPSTR(JsonKeys::configPlaylistItemFilepathKey)];
+        auto presetId   = playlistItem[FPSTR(JsonKeys::configPlaylistItemPresetIdKey)];
+        auto eraseAfter = playlistItem[FPSTR(JsonKeys::configPlaylistItemEraseAfterKey)];
+
+        if (filepath.isNull() || !filepath.is<String>()) continue;
+        if (presetId.isNull() || !presetId.is<uint8_t>()) continue;
+        if (eraseAfter.isNull() || !eraseAfter.is<bool>()) continue;
+
+        PlaylistEntry entry;
+        entry.filepath   = playlistItem[FPSTR(JsonKeys::configPlaylistItemFilepathKey)].as<String>();
+        entry.presetId   = playlistItem[FPSTR(JsonKeys::configPlaylistItemPresetIdKey)].as<uint8_t>();
+        entry.eraseAfter = playlistItem[FPSTR(JsonKeys::configPlaylistItemEraseAfterKey)].as<bool>();
+
+        readPlaylist.push_back(entry);
+    }
+
+
+    DEBUG_PRINTLN(F("ST> Updating playlist"));
+    DEBUG_PRINTLN(F("ST>  Before"));
+    uint8_t index = 0;
+    for (auto playlistItem : _playlist) {
+        DEBUG_PRINTF("ST>  ✏️  Entry %hhu of %u: %s (%hhu)\n", ++index, _playlist.capacity(), playlistItem.filepath.c_str(), playlistItem.presetId);
+    }
+
+    _playlist = readPlaylist;
+    _updates++;
+
+    DEBUG_PRINTLN(F("ST>  After"));
+    index = 0;
+    for (auto playlistItem : readPlaylist) {
+        DEBUG_PRINTF("ST>  ✏️  Entry %hhu of %u: %s (%hhu)\n", ++index, readPlaylist.capacity(), playlistItem.filepath.c_str(), playlistItem.presetId);
+    }
 }

@@ -4,25 +4,25 @@
 #include "../gcodes.hpp"
 
 namespace SandtableUsermod {
-    typedef enum MotorPowerState {
+    enum MotorPowerState {
         Unknown,
         On,
         Off
-    } MotorPowerState;
+    };
 
-    typedef enum CommandState {
+    enum CommandState {
         NotSent,
         Sent,
         Acknowledged
-    } CommandState;
+    };
 
-    typedef struct SandtableConfiguration {
+    struct SandtableConfiguration {
         bool isPlaylistActive = true;
         bool doAutoHome = true;
         uint8_t allowedBootUpTimeInSeconds = 15;
         String patternsFolder = "sdcard";
         String erasePatternsFolder = "sdcard/Erasers";
-    } SandtableConfiguration;
+    };
 
     class State {
         protected:
