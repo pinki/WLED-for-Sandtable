@@ -1,4 +1,5 @@
 #include "PlaylistState.hpp"
+#include "IdleState.hpp"
 #include "../JsonKeys.hpp"
 
 using namespace SandtableUsermod;
@@ -6,6 +7,24 @@ using namespace SandtableUsermod;
 PlaylistState SandtableUsermod::playlistState;
 
 State* PlaylistState::ProcessLine(const String& line) {
+    if (line.equals(State::OkLine)) return this;
+
+    bool isIdle = line.startsWith(IdleState::IndicatorLineStart);
+
+    if (isIdle) {
+        auto configuration = getConfiguration();
+
+        if (configuration->isPlaylistActive) {
+            // Play next playlist item
+
+
+        } else {
+            DEBUG_PRINTF(NewStatePrintfDebugLine, idleState.getName());
+
+            return &idleState;
+        }
+    }
+
     return this;
 }
 
@@ -60,4 +79,8 @@ void PlaylistState::updatePlaylist(const JsonArray& playlistArray) {
     for (auto playlistItem : readPlaylist) {
         DEBUG_PRINTF("ST>  ✏️  Entry %hhu of %u: %s (%hhu)\n", ++index, readPlaylist.capacity(), playlistItem.filepath.c_str(), playlistItem.presetId);
     }
+}
+
+uint8_t PlaylistState::getNextPlaylistItemIndex() {
+    return 0;
 }

@@ -15,6 +15,9 @@ namespace SandtableUsermod {
         private:
             std::vector<PlaylistEntry> _playlist;
             uint8_t _updates = 0;
+            uint8_t _currentPlaylistIndex = 0;
+
+            uint8_t getNextPlaylistItemIndex();
 
         public:
             PlaylistState() {
