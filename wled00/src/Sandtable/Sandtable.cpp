@@ -4,14 +4,8 @@
 
 using namespace SandtableUsermod;
 
-void Sandtable::setup() {
-    lastTime = millis();
-}
-
 void Sandtable::loop() {
     if (Serial2.available()) {
-        lastTime = millis();
-
         String line = Serial2.readStringUntil('\r');
         {
             // Skip \n
@@ -25,12 +19,8 @@ void Sandtable::loop() {
             _currentState = _currentState->ProcessLine(line);
         }
 
-    } else if (_stateQueryInterval > 0 && millis() - lastTime > _stateQueryInterval) {
-        lastTime = millis();
-
-        DEBUG_PRINTLN(F("ST> Querying state"));
-        Serial2.println(FPSTR(GCode::StateCommand));
-
+    } else if (_writePlaylistToDebugOutput) {
+        _writePlaylistToDebugOutput = false;
 
         uint8_t index = 0;
         auto playlist = playlistState.getPlaylist();
@@ -39,6 +29,8 @@ void Sandtable::loop() {
             DEBUG_PRINTF("ST> ✏️  Entry %hhu of %u: %s (%hhu)\n", ++index, playlist.capacity(), playlistItem.filepath.c_str(), playlistItem.presetId);
         }
     }
+
+    _currentState->queryStateIfNeeded();
 }
 
 void Sandtable::connected() {
@@ -50,7 +42,7 @@ void Sandtable::addToJsonState(JsonObject& root) {
 
     JsonObject top = root.createNestedObject(FPSTR(JsonKeys::configRootKey));
 
-    top[FPSTR(JsonKeys::configStateQueryIntervalKey)] = _stateQueryInterval;
+    top[FPSTR(JsonKeys::configStateQueryIntervalKey)] = stateConfig->stateQueryInterval;
 
     top[FPSTR(JsonKeys::configIsPlaylistActiveKey)] = stateConfig->isPlaylistActive;
     top[FPSTR(JsonKeys::configDoAutoHomeKey)] = stateConfig->doAutoHome;
@@ -69,10 +61,14 @@ void Sandtable::readFromJsonState(JsonObject& root) {
 
     auto stateQueryInterval = top[FPSTR(JsonKeys::configStateQueryIntervalKey)];
     if (!stateQueryInterval.isNull() && stateQueryInterval.is<uint32_t>()) {
-        _stateQueryInterval = stateQueryInterval.as<uint32_t>();
+        stateConfig->stateQueryInterval = stateQueryInterval.as<uint32_t>();
     }
 
-    // TODO: isPlaylistActive
+    auto isPlaylistActive = top[FPSTR(JsonKeys::configIsPlaylistActiveKey)];
+    if (!isPlaylistActive.isNull() && isPlaylistActive.is<bool>()) {
+        stateConfig->isPlaylistActive = isPlaylistActive.as<bool>();
+    }
+
     auto doAutoHome = top[FPSTR(JsonKeys::configDoAutoHomeKey)];
     if (!doAutoHome.isNull() && doAutoHome.is<bool>()) {
         stateConfig->doAutoHome = doAutoHome.as<bool>();
@@ -88,6 +84,7 @@ void Sandtable::readFromJsonState(JsonObject& root) {
     }
 
     playlistState.updatePlaylist(top[FPSTR(JsonKeys::configPlaylistKey)]);
+    _writePlaylistToDebugOutput = true;
 }
 
 void Sandtable::addToConfig(JsonObject& root) {
@@ -98,7 +95,7 @@ void Sandtable::addToConfig(JsonObject& root) {
     top[FPSTR(JsonKeys::configTxPinKey)] = _txPin;
 
     top[FPSTR(JsonKeys::configAllowedBootTimeInSecondsKey)] = stateConfig->allowedBootUpTimeInSeconds;
-    top[FPSTR(JsonKeys::configStateQueryIntervalKey)] = _stateQueryInterval;
+    top[FPSTR(JsonKeys::configStateQueryIntervalKey)] = stateConfig->stateQueryInterval;
 
     top[FPSTR(JsonKeys::configIsPlaylistActiveKey)] = stateConfig->isPlaylistActive;
     top[FPSTR(JsonKeys::configDoAutoHomeKey)] = stateConfig->doAutoHome;
@@ -136,7 +133,7 @@ bool Sandtable::readFromConfig(JsonObject& root) {
     static const SandtableConfiguration defaultStateConfig;
     auto stateConfig = State::getConfiguration();
 
-    configComplete &= getJsonValue(top[FPSTR(JsonKeys::configStateQueryIntervalKey)], _stateQueryInterval, 5000);
+    configComplete &= getJsonValue(top[FPSTR(JsonKeys::configStateQueryIntervalKey)], stateConfig->stateQueryInterval, defaultStateConfig.stateQueryInterval);
     configComplete &= getJsonValue(top[FPSTR(JsonKeys::configAllowedBootTimeInSecondsKey)], stateConfig->allowedBootUpTimeInSeconds, defaultStateConfig.allowedBootUpTimeInSeconds);
 
     configComplete &= getJsonValue(top[FPSTR(JsonKeys::configIsPlaylistActiveKey)], stateConfig->isPlaylistActive, defaultStateConfig.isPlaylistActive);
@@ -147,6 +144,7 @@ bool Sandtable::readFromConfig(JsonObject& root) {
 
     // Read playlist
     playlistState.updatePlaylist(top[FPSTR(JsonKeys::configPlaylistKey)]);
+    _writePlaylistToDebugOutput = true;
 
     return configComplete;
 }

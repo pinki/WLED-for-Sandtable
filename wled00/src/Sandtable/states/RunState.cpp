@@ -12,6 +12,10 @@ RunState SandtableUsermod::runState;
 const char RunState::IndicatorLineStart[] PROGMEM = "<Run|";
 
 State* RunState::ProcessLine(const String& line) {
+    _lastProcessedLineAt = millis();
+
+    if (isLineOkForStateQueryCommand(line)) return this;
+
     if (_configuration.isPlaylistActive) {
         DEBUG_PRINTF(NewStatePrintfDebugLine, playlistState.getName());
 

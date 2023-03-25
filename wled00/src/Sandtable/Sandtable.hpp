@@ -33,12 +33,10 @@ namespace SandtableUsermod {
       int8_t _rxPin = PIN_NOT_SET;
       int8_t _txPin = PIN_NOT_SET;
 
-      uint32_t _stateQueryInterval = 0;
-
-      unsigned long lastTime = 0;
+      bool _writePlaylistToDebugOutput = false;
 
     public:
-      void setup();
+      void setup() { }
 
       /*
       * loop() is called continuously. Here you can check for events, read sensors, etc.

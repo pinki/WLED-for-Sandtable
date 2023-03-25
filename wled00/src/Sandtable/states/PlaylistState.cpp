@@ -9,7 +9,9 @@ using namespace SandtableUsermod;
 PlaylistState SandtableUsermod::playlistState;
 
 State* PlaylistState::ProcessLine(const String& line) {
-    if (line.equals(State::OkLine)) return this;
+    _lastProcessedLineAt = millis();
+
+    if (isLineOkForStateQueryCommand(line)) return this;
 
     bool isIdle = line.startsWith(IdleState::IndicatorLineStart);
 
@@ -113,7 +115,7 @@ void PlaylistState::play(const PlaylistEntry& entry) {
         command = FPSTR(GCode::RunLocalFSFileCommand);
     }
 
-    applyPreset(entry.presetId, CALL_MODE_DIRECT_CHANGE);
+    applyPreset(entry.presetId, CALL_MODE_BUTTON_PRESET);
 
     if (filepath.length() > 0) {
         Serial2.printf("%s%s", command.c_str(), filepath.c_str());

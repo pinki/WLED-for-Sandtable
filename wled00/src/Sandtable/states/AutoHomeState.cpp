@@ -10,6 +10,10 @@ using namespace SandtableUsermod;
 AutoHomeState SandtableUsermod::autoHomeState;
 
 State* AutoHomeState::ProcessLine(const String& line) {
+    _lastProcessedLineAt = millis();
+    
+    if (isLineOkForStateQueryCommand(line)) return this;
+    
     switch (_homingState) {
         case HomingState::Initial:
             DEBUG_PRINTLN(F("ST> Sending home command"));

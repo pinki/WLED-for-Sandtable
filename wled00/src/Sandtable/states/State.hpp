@@ -20,6 +20,7 @@ namespace SandtableUsermod {
         bool isPlaylistActive = true;
         bool doAutoHome = true;
         uint8_t allowedBootUpTimeInSeconds = 15;
+        uint16_t stateQueryInterval = 5000;
         String patternsFolder = "sdcard";
         String erasePatternsFolder = "sdcard/Erasers";
     };
@@ -30,8 +31,13 @@ namespace SandtableUsermod {
             static MotorPowerState _motorPowerState;
             static SandtableConfiguration _configuration;
 
+            static unsigned long _lastProcessedLineAt;
+            static CommandState _queryStateCommandState;
+
             static const char OkLine[];
             static const char NewStatePrintfDebugLine[];
+
+            bool isLineOkForStateQueryCommand(const String& line);
 
         public:
             State();
@@ -41,6 +47,8 @@ namespace SandtableUsermod {
             virtual const char* getName() = 0;
 
             virtual void activate();
+
+            virtual void queryStateIfNeeded();
 
             static SandtableConfiguration* const getConfiguration();
     };

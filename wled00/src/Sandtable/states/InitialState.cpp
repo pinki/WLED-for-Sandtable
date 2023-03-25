@@ -11,7 +11,9 @@ using namespace SandtableUsermod;
 InitialState SandtableUsermod::initialState;
 
 State* InitialState::ProcessLine(const String& line) {
-    if (millis() - _activeSince > _configuration.allowedBootUpTimeInSeconds * 1000) {
+    _lastProcessedLineAt = millis();
+
+    if (_lastProcessedLineAt - _activeSince > _configuration.allowedBootUpTimeInSeconds * 1000) {
         resetSandtable();
     }
 

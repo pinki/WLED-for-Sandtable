@@ -12,6 +12,8 @@ IdleState SandtableUsermod::idleState;
 const char IdleState::IndicatorLineStart[] PROGMEM = "<Idle|";
 
 State* IdleState::ProcessLine(const String& line) {
+    _lastProcessedLineAt = millis();
+    
     if (line.startsWith(FPSTR(RunState::IndicatorLineStart))) {
         DEBUG_PRINTF(NewStatePrintfDebugLine, runState.getName());
 
