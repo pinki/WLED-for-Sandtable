@@ -5,6 +5,7 @@
 #include "IdleState.hpp"
 #include "RunState.hpp"
 #include "PlaylistState.hpp"
+#include "AlarmState.hpp"
 
 using namespace SandtableUsermod;
 
@@ -20,12 +21,22 @@ State* InitialState::ProcessLine(const String& line) {
     switch (_bootStage) {
         case 0:
             if (line.startsWith(FPSTR(IdleState::IndicatorLineStart))) {
+                DEBUG_PRINTF(NewStatePrintfDebugLine, idleState.getName());
+
                 idleState.activate();
                 return &idleState;
 
             } else if (line.startsWith(FPSTR(RunState::IndicatorLineStart))) {
+                DEBUG_PRINTF(NewStatePrintfDebugLine, runState.getName());
+
                 runState.activate();
                 return &runState;
+
+            } else if (line.startsWith(FPSTR(AlarmState::IndicatorLineStart))) {
+                DEBUG_PRINTF(NewStatePrintfDebugLine, alarmState.getName());
+
+                alarmState.activate();
+                return &alarmState;
 
             } else if (line.startsWith(F("[MSG:INFO: FluidNC v"))) {
                 _motorPowerState = MotorPowerState::Off;

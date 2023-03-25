@@ -1,6 +1,5 @@
 #pragma once
 
-#include "wled.h"
 #include "State.hpp"
 
 namespace SandtableUsermod {

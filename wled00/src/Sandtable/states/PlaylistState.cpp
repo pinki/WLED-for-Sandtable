@@ -2,6 +2,7 @@
 
 #include "PlaylistState.hpp"
 #include "IdleState.hpp"
+#include "AlarmState.hpp"
 #include "../JsonKeys.hpp"
 
 using namespace SandtableUsermod;
@@ -13,9 +14,7 @@ State* PlaylistState::ProcessLine(const String& line) {
 
     if (isLineOkForStateQueryCommand(line)) return this;
 
-    bool isIdle = line.startsWith(IdleState::IndicatorLineStart);
-
-    if (isIdle) {
+    if (line.startsWith(FPSTR(IdleState::IndicatorLineStart))) {
         auto configuration = getConfiguration();
 
         if (configuration->isPlaylistActive) {
@@ -25,9 +24,16 @@ State* PlaylistState::ProcessLine(const String& line) {
 
         } else {
             DEBUG_PRINTF(NewStatePrintfDebugLine, idleState.getName());
+            idleState.activate();
 
             return &idleState;
         }
+
+    } else if (line.startsWith(FPSTR(AlarmState::IndicatorLineStart))) {
+            DEBUG_PRINTF(NewStatePrintfDebugLine, alarmState.getName());
+            alarmState.activate();
+
+            return &alarmState;
     }
 
     return this;

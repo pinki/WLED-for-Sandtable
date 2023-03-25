@@ -1,0 +1,21 @@
+@sandtableUrl = http://sandtisch-led.local
+
+POST {{sandtableUrl}}/json/state
+Content-Type: application/json
+
+{
+    "Sandtable": {
+        "IsPlaylistActive": false
+    }
+}
+
+###
+
+POST {{sandtableUrl}}/json/state
+Content-Type: application/json
+
+{
+    "Sandtable": {
+        "IsPlaylistActive": true
+    }
+}

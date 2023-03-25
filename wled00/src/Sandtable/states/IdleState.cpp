@@ -4,6 +4,7 @@
 #include "InitialState.hpp"
 #include "RunState.hpp"
 #include "PlaylistState.hpp"
+#include "AlarmState.hpp"
 
 using namespace SandtableUsermod;
 
@@ -13,8 +14,14 @@ const char IdleState::IndicatorLineStart[] PROGMEM = "<Idle|";
 
 State* IdleState::ProcessLine(const String& line) {
     _lastProcessedLineAt = millis();
-    
-    if (line.startsWith(FPSTR(RunState::IndicatorLineStart))) {
+
+    if (line.startsWith(FPSTR(IdleState::IndicatorLineStart))) {
+        DEBUG_PRINTF(NewStatePrintfDebugLine, alarmState.getName());
+
+        alarmState.activate();
+        return alarmState.ProcessLine(line);
+
+    } else if (line.startsWith(FPSTR(RunState::IndicatorLineStart))) {
         DEBUG_PRINTF(NewStatePrintfDebugLine, runState.getName());
 
         runState.activate();

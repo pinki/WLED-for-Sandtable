@@ -22,7 +22,12 @@ void State::activate() {
 }
 
 void State::queryStateIfNeeded() {
-    if (millis() - _lastProcessedLineAt > _configuration.stateQueryInterval && _queryStateCommandState != CommandState::Sent) {
+    auto elapsed = millis() - _lastProcessedLineAt;
+
+    bool timeElapsedAndNoQuerySent = elapsed > _configuration.stateQueryInterval && _queryStateCommandState != CommandState::Sent;
+    bool longTimeElapsedAndQueryNotAcknowledged = elapsed > _configuration.stateQueryInterval * 3 && _queryStateCommandState == CommandState::Sent;
+
+    if (timeElapsedAndNoQuerySent || longTimeElapsedAndQueryNotAcknowledged) {
         DEBUG_PRINTLN(F("ST> Querying state"));
         Serial2.println(FPSTR(GCode::StateCommand));
 
@@ -35,7 +40,7 @@ SandtableConfiguration* const State::getConfiguration() {
 }
 
 bool State::isLineOkForStateQueryCommand(const String& line) {
-    if (_queryStateCommandState == CommandState::Sent && line.equals(OkLine)) {
+    if (_queryStateCommandState == CommandState::Sent && line.equals(FPSTR(OkLine))) {
         _queryStateCommandState = CommandState::Acknowledged;
 
         DEBUG_PRINTLN(F("ST> State query is acknowledged."));
