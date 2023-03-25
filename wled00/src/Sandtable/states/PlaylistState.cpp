@@ -39,6 +39,12 @@ State* PlaylistState::ProcessLine(const String& line) {
     return this;
 }
 
+void PlaylistState::activate() {
+    State::activate();
+
+    _motorPowerState = MotorPowerState::On;
+}
+
 void PlaylistState::writePlaylist(const JsonObject& parentObject) {
     JsonArray playlistArray = parentObject.createNestedArray(FPSTR(JsonKeys::configPlaylistKey));
 

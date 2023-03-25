@@ -32,6 +32,8 @@ namespace SandtableUsermod {
             State* ProcessLine(const String& line) override;
 
             const char* getName() override { return "Playlist"; }
+            
+            void activate() override;
 
             uint8_t getUpdateCount() { return _updates; }
 

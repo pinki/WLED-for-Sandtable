@@ -15,7 +15,7 @@ const char IdleState::IndicatorLineStart[] PROGMEM = "<Idle|";
 State* IdleState::ProcessLine(const String& line) {
     _lastProcessedLineAt = millis();
 
-    if (line.startsWith(FPSTR(IdleState::IndicatorLineStart))) {
+    if (line.startsWith(FPSTR(AlarmState::IndicatorLineStart))) {
         DEBUG_PRINTF(NewStatePrintfDebugLine, alarmState.getName());
 
         alarmState.activate();
