@@ -1,3 +1,5 @@
+#include <wled.h>
+
 #include "PlaylistState.hpp"
 #include "IdleState.hpp"
 #include "../JsonKeys.hpp"
@@ -110,6 +112,8 @@ void PlaylistState::play(const PlaylistEntry& entry) {
 
         command = FPSTR(GCode::RunLocalFSFileCommand);
     }
+
+    applyPreset(entry.presetId, CALL_MODE_DIRECT_CHANGE);
 
     if (filepath.length() > 0) {
         Serial2.printf("%s%s", command.c_str(), filepath.c_str());
