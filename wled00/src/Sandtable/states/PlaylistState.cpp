@@ -16,7 +16,8 @@ State* PlaylistState::ProcessLine(const String& line) {
 
         if (configuration->isPlaylistActive) {
             // Play next playlist item
-
+            uint8_t index = getNextPlaylistItemIndex();
+            play(_playlist.at(index));
 
         } else {
             DEBUG_PRINTF(NewStatePrintfDebugLine, idleState.getName());
@@ -82,5 +83,35 @@ void PlaylistState::updatePlaylist(const JsonArray& playlistArray) {
 }
 
 uint8_t PlaylistState::getNextPlaylistItemIndex() {
-    return 0;
+    static uint8_t nextIndex = 255;
+
+    if (++nextIndex >= _playlist.size()) {
+        nextIndex = 0;
+    }
+
+    return nextIndex;
+}
+
+void PlaylistState::play(const PlaylistEntry& entry) {
+    DEBUG_PRINTF("ST> Playing '%s'...\n", entry.filepath.c_str());
+
+    String filepath;
+    String command;
+
+    if (entry.filepath.startsWith(F("sdcard/"))) {
+        filepath = entry.filepath.substring(6);
+        DEBUG_PRINTF("ST> Filepath = %s\n", filepath.c_str());
+
+        command = FPSTR(GCode::RunSDCardFileCommand);
+
+    } else if (entry.filepath.startsWith(F("localfs/"))) {
+        filepath = entry.filepath.substring(7);
+        DEBUG_PRINTF("ST> Filepath = %s\n", filepath.c_str());
+
+        command = FPSTR(GCode::RunLocalFSFileCommand);
+    }
+
+    if (filepath.length() > 0) {
+        Serial2.printf("%s%s", command.c_str(), filepath.c_str());
+    }
 }

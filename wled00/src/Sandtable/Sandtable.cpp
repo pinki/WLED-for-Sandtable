@@ -136,7 +136,7 @@ bool Sandtable::readFromConfig(JsonObject& root) {
     static const SandtableConfiguration defaultStateConfig;
     auto stateConfig = State::getConfiguration();
 
-    configComplete &= getJsonValue(top[FPSTR(JsonKeys::configStateQueryIntervalKey)], _stateQueryInterval, 3000);
+    configComplete &= getJsonValue(top[FPSTR(JsonKeys::configStateQueryIntervalKey)], _stateQueryInterval, 5000);
     configComplete &= getJsonValue(top[FPSTR(JsonKeys::configAllowedBootTimeInSecondsKey)], stateConfig->allowedBootUpTimeInSeconds, defaultStateConfig.allowedBootUpTimeInSeconds);
 
     configComplete &= getJsonValue(top[FPSTR(JsonKeys::configIsPlaylistActiveKey)], stateConfig->isPlaylistActive, defaultStateConfig.isPlaylistActive);
