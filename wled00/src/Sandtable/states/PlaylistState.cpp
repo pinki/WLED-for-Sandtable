@@ -96,6 +96,9 @@ void PlaylistState::updatePlaylist(const JsonArray& playlistArray) {
     for (auto playlistItem : readPlaylist) {
         DEBUG_PRINTF("ST>  ✏️  Entry %hhu of %u: %s (%hhu)\n", ++index, readPlaylist.capacity(), playlistItem.filepath.c_str(), playlistItem.presetId);
     }
+
+    // Write to configuration file
+    serializeConfig();
 }
 
 uint8_t PlaylistState::getNextPlaylistItemIndex() {

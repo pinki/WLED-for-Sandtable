@@ -1,5 +1,6 @@
 @sandtableUrl = http://sandtisch-led.local
 
+### Playlist off
 POST {{sandtableUrl}}/json/state
 Content-Type: application/json
 
@@ -9,13 +10,53 @@ Content-Type: application/json
     }
 }
 
-###
-
+### Playlist on
 POST {{sandtableUrl}}/json/state
 Content-Type: application/json
 
 {
     "Sandtable": {
         "IsPlaylistActive": true
+    }
+}
+
+### Set playlist
+POST {{sandtableUrl}}/json/state
+Content-Type: application/json
+
+{
+    "Sandtable": {
+        "Playlist": [
+            {
+                "Filepath": "sdcard/Hexagons.gcode",
+                "PresetId": 1,
+                "EraseAfter": false
+            },
+            {
+                "Filepath": "sdcard/Jonah_Herz.gcode",
+                "PresetId": 2,
+                "EraseAfter": false
+            },
+            {
+                "Filepath": "sdcard/Eraser/Kringel.gcode",
+                "PresetId": 3,
+                "EraseAfter": false
+            },
+            {
+                "Filepath": "sdcard/Michael.gcode",
+                "PresetId": 4,
+                "EraseAfter": false
+            },
+            {
+                "Filepath": "sdcard/Eraser/Space Filler.gcode",
+                "PresetId": 5,
+                "EraseAfter": false
+            },
+            {
+                "Filepath": "sdcard/Jonah.gcode",
+                "PresetId": 6,
+                "EraseAfter": false
+            }
+        ]
     }
 }
