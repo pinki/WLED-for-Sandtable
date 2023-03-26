@@ -18,6 +18,8 @@ namespace SandtableUsermod {
             State* ProcessLine(const String& line) override;
 
             const char* getName() override { return "Auto Home"; }
+
+            virtual void activate() override;
     };
 
     extern AutoHomeState autoHomeState;

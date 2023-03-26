@@ -60,3 +60,14 @@ State* AutoHomeState::ProcessLine(const String& line) {
 
     return this;
 }
+
+void AutoHomeState::activate() {
+    State::activate();
+
+    _motorPowerState = MotorPowerState::On;
+
+    DEBUG_PRINTLN(F("ST> Sending home command"));
+    Serial2.println(FPSTR(GCode::HomeCommand));
+
+    _homingState = HomingState::HomeCommandSent;
+}
