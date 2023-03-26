@@ -14,10 +14,17 @@ namespace SandtableUsermod {
     class PlaylistState : public State {
         private:
             std::vector<PlaylistEntry> _playlist;
+            std::vector<String> _erasers;
+
+            bool _shouldUpdateErasers = false;
+            CommandState _listErasersFolderCommandState = CommandState::NotSent;
+
             uint8_t _updates = 0;
 
             uint8_t getNextPlaylistItemIndex();
             void play(const PlaylistEntry& entry);
+
+            void updateErasers();
 
         public:
             PlaylistState() {
@@ -40,6 +47,8 @@ namespace SandtableUsermod {
             const std::vector<PlaylistEntry> getPlaylist() { return _playlist; }
             void writePlaylist(const JsonObject& parentObject);
             bool updatePlaylist(const JsonArray& playlistArray);
+
+            void shouldUpdateErasers() { _shouldUpdateErasers = true; }
     };
 
     extern PlaylistState playlistState;

@@ -35,6 +35,7 @@ namespace SandtableUsermod {
             static CommandState _queryStateCommandState;
 
             static const char OkLine[];
+            static const char MessageLineStart[];
             static const char NewStatePrintfDebugLine[];
 
             bool isLineOkForStateQueryCommand(const String& line);

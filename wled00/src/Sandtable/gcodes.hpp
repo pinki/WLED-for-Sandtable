@@ -9,5 +9,7 @@ namespace SandtableUsermod {
             static const char DisableMotorsCommand[];
             static const char RunSDCardFileCommand[];
             static const char RunLocalFSFileCommand[];
+            static const char ListSDCardFileCommand[];
+            static const char ListLocalFSFileCommand[];
     };
 };

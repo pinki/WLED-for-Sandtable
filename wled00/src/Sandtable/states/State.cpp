@@ -11,6 +11,7 @@ unsigned long State::_lastProcessedLineAt = 0;
 CommandState State::_queryStateCommandState = CommandState::NotSent;
 
 const char State::OkLine[]                  PROGMEM = "ok";
+const char State::MessageLineStart[]        PROGMEM = "[MSG: ";
 const char State::NewStatePrintfDebugLine[]         = "ST> ℹ️ New state :: %s\n";
 
 State::State() {

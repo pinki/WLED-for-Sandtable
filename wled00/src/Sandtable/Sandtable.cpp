@@ -4,6 +4,14 @@
 
 using namespace SandtableUsermod;
 
+void Sandtable::setup() {
+    #ifdef RUN_SANDTABLE_SUPERFAST
+    Serial2.println(F("G1 F4000"));
+    #elif defined(RUN_SANDTABLE_FAST)
+    Serial2.println(F("G1 F2000"));
+    #endif
+}
+
 void Sandtable::loop() {
     if (Serial2.available()) {
         String line = Serial2.readStringUntil('\r');
@@ -19,7 +27,7 @@ void Sandtable::loop() {
             _currentState = _currentState->ProcessLine(line);
         }
 
-    } else if (_writePlaylistToDebugOutput) {
+    } else if (WiFi.isConnected() && _writePlaylistToDebugOutput) {
         _writePlaylistToDebugOutput = false;
 
         uint8_t index = 0;
@@ -59,33 +67,44 @@ void Sandtable::readFromJsonState(JsonObject& root) {
     JsonObject top = root[FPSTR(JsonKeys::configRootKey)];
     if (top.isNull()) return;
 
+    bool changed = false;
+
     auto stateQueryInterval = top[FPSTR(JsonKeys::configStateQueryIntervalKey)];
     if (!stateQueryInterval.isNull() && stateQueryInterval.is<uint32_t>()) {
         stateConfig->stateQueryInterval = stateQueryInterval.as<uint32_t>();
+        changed = true;
     }
 
     auto isPlaylistActive = top[FPSTR(JsonKeys::configIsPlaylistActiveKey)];
     if (!isPlaylistActive.isNull() && isPlaylistActive.is<bool>()) {
         stateConfig->isPlaylistActive = isPlaylistActive.as<bool>();
+        changed = true;
     }
 
     auto doAutoHome = top[FPSTR(JsonKeys::configDoAutoHomeKey)];
     if (!doAutoHome.isNull() && doAutoHome.is<bool>()) {
         stateConfig->doAutoHome = doAutoHome.as<bool>();
+        changed = true;
     }
 
     auto patternFolder = top[FPSTR(JsonKeys::configPatternsFolderKey)];
     if (!patternFolder.isNull() && patternFolder.is<String>()) {
         stateConfig->patternsFolder = patternFolder.as<String>();
+        changed = true;
     }
     auto erasePatternsFolder = top[FPSTR(JsonKeys::configErasePatternsFolderKey)];
     if (!erasePatternsFolder.isNull() && erasePatternsFolder.is<String>()) {
         stateConfig->erasePatternsFolder = erasePatternsFolder.as<String>();
+        playlistState.shouldUpdateErasers();
+        changed = true;
     }
 
     if (playlistState.updatePlaylist(top[FPSTR(JsonKeys::configPlaylistKey)])) {
         _writePlaylistToDebugOutput = true;
+        changed = true;
+    }
 
+    if (changed) {
         // Write to configuration file
         serializeConfig();
     }
@@ -145,6 +164,7 @@ bool Sandtable::readFromConfig(JsonObject& root) {
 
     configComplete &= getJsonValue(top[FPSTR(JsonKeys::configPatternsFolderKey)], stateConfig->patternsFolder, defaultStateConfig.patternsFolder);
     configComplete &= getJsonValue(top[FPSTR(JsonKeys::configErasePatternsFolderKey)], stateConfig->erasePatternsFolder, defaultStateConfig.erasePatternsFolder);
+    playlistState.shouldUpdateErasers();
 
     // Read playlist
     playlistState.updatePlaylist(top[FPSTR(JsonKeys::configPlaylistKey)]);

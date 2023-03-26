@@ -36,7 +36,7 @@ namespace SandtableUsermod {
       bool _writePlaylistToDebugOutput = false;
 
     public:
-      void setup() { }
+      void setup();
 
       /*
       * loop() is called continuously. Here you can check for events, read sensors, etc.

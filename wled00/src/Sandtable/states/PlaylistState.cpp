@@ -1,6 +1,7 @@
 #include <wled.h>
 
 #include "PlaylistState.hpp"
+#include "RunState.hpp"
 #include "IdleState.hpp"
 #include "AlarmState.hpp"
 #include "../JsonKeys.hpp"
@@ -14,13 +15,17 @@ State* PlaylistState::ProcessLine(const String& line) {
 
     if (isLineOkForStateQueryCommand(line)) return this;
 
-    if (line.startsWith(FPSTR(IdleState::IndicatorLineStart))) {
+    bool couldUpdateErasers = true;
+
+    if (line.startsWith(FPSTR(IdleState::IndicatorLineStart)) && !_shouldUpdateErasers) {
         auto configuration = getConfiguration();
 
         if (configuration->isPlaylistActive) {
             // Play next playlist item
             uint8_t index = getNextPlaylistItemIndex();
             play(_playlist.at(index));
+
+            couldUpdateErasers = false;
 
         } else {
             DEBUG_PRINTF(NewStatePrintfDebugLine, idleState.getName());
@@ -34,6 +39,20 @@ State* PlaylistState::ProcessLine(const String& line) {
             alarmState.activate();
 
             return &alarmState;
+
+    } else if (line.startsWith(FPSTR(RunState::IndicatorLineStart))) {
+        couldUpdateErasers = false;
+
+    } else if (line.equals(FPSTR(OkLine))) {
+        couldUpdateErasers = false;
+
+    } else if (line.startsWith(FPSTR(MessageLineStart))) {
+        // e.g. [MSG: /sd/Eraser/Test.gcode file job succeeded]
+        couldUpdateErasers = false;
+    }
+
+    if (couldUpdateErasers && _shouldUpdateErasers) {
+        updateErasers();
     }
 
     return this;
@@ -98,6 +117,27 @@ bool PlaylistState::updatePlaylist(const JsonArray& playlistArray) {
     }
 
     return true;
+}
+
+void PlaylistState::updateErasers() {
+    DEBUG_PRINTLN(F("ST> Updating erasers..."));
+    _shouldUpdateErasers = false;
+
+    String command;
+
+    if (_configuration.erasePatternsFolder.startsWith("sdcard/")) {
+        command = FPSTR(GCode::ListSDCardFileCommand);
+
+    } else if (_configuration.erasePatternsFolder.startsWith("localfs/")) {
+        command = FPSTR(GCode::ListLocalFSFileCommand);
+
+    } else {
+        DEBUG_PRINTLN(F("ST> ❌ Unknown eraser folder source!"));
+    }
+
+    if (command.length() > 0) {
+        Serial2.println(command.c_str());
+    }
 }
 
 uint8_t PlaylistState::getNextPlaylistItemIndex() {
