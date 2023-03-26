@@ -27,7 +27,7 @@ State* AutoHomeState::ProcessLine(const String& line) {
                 _homingState = HomingState::Homing;
                 _motorPowerState = MotorPowerState::On;
 
-            } else if (line.equals(FPSTR(OkLine))) {
+            } else if (line.equals(FPSTR(OkLine)) || line.startsWith(FPSTR(IdleState::IndicatorLineStart))) {
                 _homingState = HomingState::Homed;
                 _motorPowerState = MotorPowerState::On;
 
@@ -35,17 +35,21 @@ State* AutoHomeState::ProcessLine(const String& line) {
 
                 idleState.activate();
                 return &idleState;
+
             }
             break;
 
         case HomingState::Homing:
             if (line.equals(FPSTR(OkLine))) {
                 _homingState = HomingState::Homed;
+                break;
             }
-            break;
+            // No break here, because it could be, that it's already homed.
 
         case HomingState::Homed:
             if (line.startsWith(FPSTR(IdleState::IndicatorLineStart))) {
+                _homingState = HomingState::Homed; // See previous state
+
                 DEBUG_PRINTF(NewStatePrintfDebugLine, idleState.getName());
 
                 idleState.activate();
