@@ -16,6 +16,8 @@ namespace SandtableUsermod {
             std::vector<PlaylistEntry> _playlist;
             std::vector<String> _erasers;
 
+            unsigned long _timeLastRunPlaylistEntryCommandSent = 0;
+
             bool _shouldUpdateErasers = false;
             CommandState _listErasersFolderCommandState = CommandState::NotSent;
 

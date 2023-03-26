@@ -21,11 +21,13 @@ State* PlaylistState::ProcessLine(const String& line) {
         auto configuration = getConfiguration();
 
         if (configuration->isPlaylistActive) {
-            // Play next playlist item
-            uint8_t index = getNextPlaylistItemIndex();
-            play(_playlist.at(index));
+            if (_lastProcessedLineAt - _timeLastRunPlaylistEntryCommandSent > _configuration.stateQueryInterval * 2) {
+                // Play next playlist item
+                uint8_t index = getNextPlaylistItemIndex();
+                play(_playlist.at(index));
 
-            couldUpdateErasers = false;
+                couldUpdateErasers = false;
+            }
 
         } else {
             DEBUG_PRINTF(NewStatePrintfDebugLine, idleState.getName());
@@ -173,5 +175,7 @@ void PlaylistState::play(const PlaylistEntry& entry) {
 
     if (filepath.length() > 0) {
         Serial2.printf("%s%s", command.c_str(), filepath.c_str());
+
+        _timeLastRunPlaylistEntryCommandSent = millis();
     }
 }

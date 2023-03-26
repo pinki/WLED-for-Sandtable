@@ -14,6 +14,7 @@ void Sandtable::setup() {
 
 void Sandtable::loop() {
     if (Serial2.available()) {
+        static String lastLine = "";
         String line = Serial2.readStringUntil('\r');
         {
             // Skip \n
@@ -21,10 +22,12 @@ void Sandtable::loop() {
             Serial2.readBytes(notInUse, 1);
         }
 
-        if (line.length()) {
+        if (line.length() && !line.equals(lastLine)) {
             DEBUG_PRINTF("ST> %s state is processing line: %s\n", _currentState->getName(), line.c_str());
 
             _currentState = _currentState->ProcessLine(line);
+
+            lastLine = line;
         }
 
     } else if (WiFi.isConnected() && _writePlaylistToDebugOutput) {
