@@ -56,8 +56,8 @@ void PlaylistState::writePlaylist(const JsonObject& parentObject) {
     }
 }
 
-void PlaylistState::updatePlaylist(const JsonArray& playlistArray) {
-    if (playlistArray.isNull()) return;
+bool PlaylistState::updatePlaylist(const JsonArray& playlistArray) {
+    if (playlistArray.isNull()) return false;
 
     std::vector<PlaylistEntry> readPlaylist;
     for (size_t i = 0; i < playlistArray.size(); i++) {
@@ -97,8 +97,7 @@ void PlaylistState::updatePlaylist(const JsonArray& playlistArray) {
         DEBUG_PRINTF("ST>  ✏️  Entry %hhu of %u: %s (%hhu)\n", ++index, readPlaylist.capacity(), playlistItem.filepath.c_str(), playlistItem.presetId);
     }
 
-    // Write to configuration file
-    serializeConfig();
+    return true;
 }
 
 uint8_t PlaylistState::getNextPlaylistItemIndex() {

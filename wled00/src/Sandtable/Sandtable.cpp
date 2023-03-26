@@ -83,8 +83,12 @@ void Sandtable::readFromJsonState(JsonObject& root) {
         stateConfig->erasePatternsFolder = erasePatternsFolder.as<String>();
     }
 
-    playlistState.updatePlaylist(top[FPSTR(JsonKeys::configPlaylistKey)]);
-    _writePlaylistToDebugOutput = true;
+    if (playlistState.updatePlaylist(top[FPSTR(JsonKeys::configPlaylistKey)])) {
+        _writePlaylistToDebugOutput = true;
+
+        // Write to configuration file
+        serializeConfig();
+    }
 }
 
 void Sandtable::addToConfig(JsonObject& root) {

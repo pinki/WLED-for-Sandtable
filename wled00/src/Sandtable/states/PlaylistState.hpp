@@ -39,7 +39,7 @@ namespace SandtableUsermod {
 
             const std::vector<PlaylistEntry> getPlaylist() { return _playlist; }
             void writePlaylist(const JsonObject& parentObject);
-            void updatePlaylist(const JsonArray& playlistArray);
+            bool updatePlaylist(const JsonArray& playlistArray);
     };
 
     extern PlaylistState playlistState;
