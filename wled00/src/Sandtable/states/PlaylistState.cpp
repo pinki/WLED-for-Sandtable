@@ -171,7 +171,10 @@ void PlaylistState::play(const PlaylistEntry& entry) {
         command = FPSTR(GCode::RunLocalFSFileCommand);
     }
 
-    applyPreset(entry.presetId, CALL_MODE_BUTTON_PRESET);
+    bool isOn = bri;
+    if (isOn) {
+        applyPreset(entry.presetId, CALL_MODE_BUTTON_PRESET);
+    }
 
     if (filepath.length() > 0) {
         Serial2.printf("%s%s", command.c_str(), filepath.c_str());
