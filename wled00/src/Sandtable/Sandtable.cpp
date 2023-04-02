@@ -13,6 +13,12 @@ void Sandtable::setup() {
 }
 
 void Sandtable::loop() {
+    if (_serializeConfig) {
+        _serializeConfig = false;
+
+        serializeConfig();
+    }
+
     if (Serial2.available()) {
         static String lastLine = "";
         String line = Serial2.readStringUntil('\r');
@@ -109,7 +115,7 @@ void Sandtable::readFromJsonState(JsonObject& root) {
 
     if (changed) {
         // Write to configuration file
-        serializeConfig();
+        _serializeConfig = true;
     }
 }
 

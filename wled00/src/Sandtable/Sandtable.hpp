@@ -33,6 +33,7 @@ namespace SandtableUsermod {
       int8_t _rxPin = PIN_NOT_SET;
       int8_t _txPin = PIN_NOT_SET;
 
+      bool _serializeConfig = false;
       bool _writePlaylistToDebugOutput = false;
 
     public:

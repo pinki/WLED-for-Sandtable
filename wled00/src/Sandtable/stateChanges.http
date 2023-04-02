@@ -69,32 +69,32 @@ Content-Type: application/json
     "Sandtable": {
         "Playlist": [
             {
-                "Filepath": "sdcard/MakerSpace/MSM-Logo_outline.gcode",
+                "Filepath": "sdcard/MakerSpace/MSM-Logo_outline_MakerFaire.gcode",
                 "PresetId": 12,
                 "EraseAfter": false
             },
             {
-                "Filepath": "sdcard/Eraser/Kringel.gcode",
+                "Filepath": "sdcard/Eraser/MSM-Eraser.gcode",
                 "PresetId": 13,
                 "EraseAfter": false
             },
             {
-                "Filepath": "sdcard/MakerSpace/MSM-Logo_outline.gcode",
+                "Filepath": "sdcard/MakerSpace/MSM-Logo_outline_MakerFaire.gcode",
                 "PresetId": 14,
                 "EraseAfter": false
             },
             {
-                "Filepath": "sdcard/Eraser/Kringel.gcode",
+                "Filepath": "sdcard/Eraser/MSM-Eraser.gcode",
                 "PresetId": 15,
                 "EraseAfter": false
             },
             {
-                "Filepath": "sdcard/MakerSpace/MSM-Logo_outline.gcode",
+                "Filepath": "sdcard/MakerSpace/MSM-Logo_outline_MakerFaire.gcode",
                 "PresetId": 16,
                 "EraseAfter": false
             },
             {
-                "Filepath": "sdcard/Eraser/Kringel.gcode",
+                "Filepath": "sdcard/Eraser/MSM-Eraser.gcode",
                 "PresetId": 17,
                 "EraseAfter": false
             }
