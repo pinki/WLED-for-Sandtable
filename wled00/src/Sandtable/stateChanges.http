@@ -1,15 +1,5 @@
 @sandtableUrl = http://sandtisch-led.local
 
-### Playlist off
-POST {{sandtableUrl}}/json/state
-Content-Type: application/json
-
-{
-    "Sandtable": {
-        "IsPlaylistActive": false
-    }
-}
-
 ### Playlist on
 POST {{sandtableUrl}}/json/state
 Content-Type: application/json
@@ -17,6 +7,16 @@ Content-Type: application/json
 {
     "Sandtable": {
         "IsPlaylistActive": true
+    }
+}
+
+### Playlist off
+POST {{sandtableUrl}}/json/state
+Content-Type: application/json
+
+{
+    "Sandtable": {
+        "IsPlaylistActive": false
     }
 }
 
@@ -55,6 +55,47 @@ Content-Type: application/json
             {
                 "Filepath": "sdcard/Jonah.gcode",
                 "PresetId": 6,
+                "EraseAfter": false
+            }
+        ]
+    }
+}
+
+### Set playlist for MakerFaire
+POST {{sandtableUrl}}/json/state
+Content-Type: application/json
+
+{
+    "Sandtable": {
+        "Playlist": [
+            {
+                "Filepath": "sdcard/MakerSpace/MSM-Logo_outline.gcode",
+                "PresetId": 12,
+                "EraseAfter": false
+            },
+            {
+                "Filepath": "sdcard/Eraser/Kringel.gcode",
+                "PresetId": 13,
+                "EraseAfter": false
+            },
+            {
+                "Filepath": "sdcard/MakerSpace/MSM-Logo_outline.gcode",
+                "PresetId": 14,
+                "EraseAfter": false
+            },
+            {
+                "Filepath": "sdcard/Eraser/Kringel.gcode",
+                "PresetId": 15,
+                "EraseAfter": false
+            },
+            {
+                "Filepath": "sdcard/MakerSpace/MSM-Logo_outline.gcode",
+                "PresetId": 16,
+                "EraseAfter": false
+            },
+            {
+                "Filepath": "sdcard/Eraser/Kringel.gcode",
+                "PresetId": 17,
                 "EraseAfter": false
             }
         ]
