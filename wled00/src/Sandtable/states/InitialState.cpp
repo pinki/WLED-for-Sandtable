@@ -32,11 +32,11 @@ State* InitialState::ProcessLine(const String& line) {
                 runState.activate();
                 return &runState;
 
-            } else if (line.startsWith(FPSTR(AlarmState::IndicatorLineStart))) {
-                DEBUG_PRINTF(NewStatePrintfDebugLine, alarmState.getName());
+            // } else if (line.startsWith(FPSTR(AlarmState::IndicatorLineStart))) {
+            //     DEBUG_PRINTF(NewStatePrintfDebugLine, alarmState.getName());
 
-                alarmState.activate();
-                return &alarmState;
+            //     alarmState.activate();
+            //     return &alarmState;
 
             } else if (line.startsWith(F("[MSG:INFO: FluidNC v"))) {
                 _motorPowerState = MotorPowerState::Off;
